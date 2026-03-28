@@ -10,7 +10,7 @@ export default function BiodataDiri() {
             
             <h2>📋 BIODATA SAYA</h2>
             
-            {/* Layout 2 kolom: Foto persegi di kiri, Biodata di kanan */}
+          
             <div className="biodata-container">
                 <FotoProfile />
                 <InfoBiodata />
