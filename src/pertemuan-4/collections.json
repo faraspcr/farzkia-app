@@ -1,0 +1,542 @@
+[
+  {
+    "id": 1,
+    "name": "Kebaya Modern Scarlet",
+    "category": "Kebaya",
+    "price": 1250000,
+    "rating": 4.9,
+    "image": "Kebaya.jpg",
+    "stock": 8,
+    "isAvailable": true,
+    "designer": {
+      "name": "Ratna Dewi",
+      "city": "Jakarta",
+      "experience_years": 12
+    },
+    "material": {
+      "fabric_type": "Brokat",
+      "is_premium": true,
+      "comfort_level": "High"
+    },
+    "size": {
+      "s": false,
+      "m": true,
+      "l": true,
+      "xl": true,
+      "is_available": true
+    }
+  },
+  {
+    "id": 2,
+    "name": "Satin Slip Dress Olive",
+    "category": "Dress",
+    "price": 459000,
+    "rating": 4.7,
+    "image": "Satin.jpg",
+    "stock": 15,
+    "isAvailable": true,
+    "designer": {
+      "name": "Sari Anggraeni",
+      "city": "Bandung",
+      "experience_years": 5
+    },
+    "material": {
+      "fabric_type": "Satin",
+      "is_premium": true,
+      "comfort_level": "Very High"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": true,
+      "xl": false,
+      "is_available": true
+    }
+  },
+  {
+    "id": 3,
+    "name": "Blouse Brokat Tangan",
+    "category": "Blouse",
+    "price": 385000,
+    "rating": 4.8,
+    "image": "Blouse.jpg",
+    "stock": 12,
+    "isAvailable": true,
+    "designer": {
+      "name": "Dewi Lestari",
+      "city": "Solo",
+      "experience_years": 8
+    },
+    "material": {
+      "fabric_type": "Brokat",
+      "is_premium": true,
+      "comfort_level": "Medium"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": true,
+      "xl": true,
+      "is_available": true
+    }
+  },
+  {
+    "id": 4,
+    "name": "Outer Kimono Floral",
+    "category": "Outer",
+    "price": 299000,
+    "rating": 4.5,
+    "image": "Outer.jpg",
+    "stock": 20,
+    "isAvailable": true,
+    "designer": {
+      "name": "Maya Sari",
+      "city": "Yogyakarta",
+      "experience_years": 4
+    },
+    "material": {
+      "fabric_type": "Katun",
+      "is_premium": false,
+      "comfort_level": "High"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": true,
+      "xl": true,
+      "is_available": true
+    }
+  },
+  {
+    "id": 5,
+    "name": "Gamis Ceruty Navy",
+    "category": "Gamis",
+    "price": 425000,
+    "rating": 4.6,
+    "image": "Gamis.jpg",
+    "stock": 10,
+    "isAvailable": true,
+    "designer": {
+      "name": "Fatimah Azzahra",
+      "city": "Surabaya",
+      "experience_years": 6
+    },
+    "material": {
+      "fabric_type": "Katun",
+      "is_premium": false,
+      "comfort_level": "Very High"
+    },
+    "size": {
+      "s": false,
+      "m": true,
+      "l": true,
+      "xl": true,
+      "is_available": true
+    }
+  },
+  {
+    "id": 6,
+    "name": "Rok Plisket Elegan",
+    "category": "Rok",
+    "price": 275000,
+    "rating": 4.4,
+    "image": "rok.jpg",
+    "stock": 18,
+    "isAvailable": true,
+    "designer": {
+      "name": "Putri Nabila",
+      "city": "Bandung",
+      "experience_years": 3
+    },
+    "material": {
+      "fabric_type": "Silk",
+      "is_premium": true,
+      "comfort_level": "High"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": false,
+      "xl": false,
+      "is_available": true
+    }
+  },
+  {
+    "id": 7,
+    "name": "Kebaya Couple Hijab",
+    "category": "Kebaya",
+    "price": 1499000,
+    "rating": 5.0,
+    "image": "Kebaya.jpg",
+    "stock": 5,
+    "isAvailable": true,
+    "designer": {
+      "name": "Ratna Dewi",
+      "city": "Jakarta",
+      "experience_years": 12
+    },
+    "material": {
+      "fabric_type": "Brokat",
+      "is_premium": true,
+      "comfort_level": "Medium"
+    },
+    "size": {
+      "s": false,
+      "m": true,
+      "l": true,
+      "xl": false,
+      "is_available": true
+    }
+  },
+  {
+    "id": 8,
+    "name": "Dress A Line Baby Doll",
+    "category": "Dress",
+    "price": 359000,
+    "rating": 4.7,
+    "image": "DressBaju.jpg",
+    "stock": 14,
+    "isAvailable": true,
+    "designer": {
+      "name": "Sari Anggraeni",
+      "city": "Bandung",
+      "experience_years": 5
+    },
+    "material": {
+      "fabric_type": "Katun",
+      "is_premium": false,
+      "comfort_level": "Very High"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": true,
+      "xl": true,
+      "is_available": true
+    }
+  },
+  {
+    "id": 9,
+    "name": "Blouse Puff Sleeve",
+    "category": "Blouse",
+    "price": 219000,
+    "rating": 4.3,
+    "image": "blousePuff.jpg",
+    "stock": 25,
+    "isAvailable": true,
+    "designer": {
+      "name": "Maya Sari",
+      "city": "Yogyakarta",
+      "experience_years": 4
+    },
+    "material": {
+      "fabric_type": "Satin",
+      "is_premium": false,
+      "comfort_level": "High"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": true,
+      "xl": true,
+      "is_available": true
+    }
+  },
+  {
+    "id": 10,
+    "name": "Outer Cardigan Wolly",
+    "category": "Outer",
+    "price": 195000,
+    "rating": 4.2,
+    "image": "OuterCardigan.jpg",
+    "stock": 30,
+    "isAvailable": true,
+    "designer": {
+      "name": "Dewi Lestari",
+      "city": "Solo",
+      "experience_years": 8
+    },
+    "material": {
+      "fabric_type": "Katun",
+      "is_premium": false,
+      "comfort_level": "High"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": true,
+      "xl": true,
+      "is_available": true
+    }
+  },
+  {
+    "id": 11,
+    "name": "Gamis Brukat Payet",
+    "category": "Gamis",
+    "price": 675000,
+    "rating": 4.9,
+    "image": "GamisBrukat.jpg",
+    "stock": 7,
+    "isAvailable": true,
+    "designer": {
+      "name": "Fatimah Azzahra",
+      "city": "Surabaya",
+      "experience_years": 6
+    },
+    "material": {
+      "fabric_type": "Brokat",
+      "is_premium": true,
+      "comfort_level": "Medium"
+    },
+    "size": {
+      "s": false,
+      "m": false,
+      "l": true,
+      "xl": true,
+      "is_available": true
+    }
+  },
+  {
+    "id": 12,
+    "name": "Rok Batik Kontemporer",
+    "category": "Rok",
+    "price": 325000,
+    "rating": 4.6,
+    "image": "RokBatik.jpg",
+    "stock": 12,
+    "isAvailable": true,
+    "designer": {
+      "name": "Putri Nabila",
+      "city": "Bandung",
+      "experience_years": 3
+    },
+    "material": {
+      "fabric_type": "Silk",
+      "is_premium": true,
+      "comfort_level": "Medium"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": true,
+      "xl": false,
+      "is_available": true
+    }
+  },
+  {
+    "id": 13,
+    "name": "Kebaya Encim Brokat",
+    "category": "Kebaya",
+    "price": 1850000,
+    "rating": 5.0,
+    "image": "Kebaya.jpg",
+    "stock": 3,
+    "isAvailable": true,
+    "designer": {
+      "name": "Ratna Dewi",
+      "city": "Jakarta",
+      "experience_years": 12
+    },
+    "material": {
+      "fabric_type": "Brokat",
+      "is_premium": true,
+      "comfort_level": "Medium"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": false,
+      "xl": false,
+      "is_available": true
+    }
+  },
+  {
+    "id": 14,
+    "name": "Dress Midi Silk",
+    "category": "Dress",
+    "price": 549000,
+    "rating": 4.8,
+    "image": "DressSilk.jpg",
+    "stock": 9,
+    "isAvailable": true,
+    "designer": {
+      "name": "Sari Anggraeni",
+      "city": "Bandung",
+      "experience_years": 5
+    },
+    "material": {
+      "fabric_type": "Silk",
+      "is_premium": true,
+      "comfort_level": "Very High"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": true,
+      "xl": true,
+      "is_available": true
+    }
+  },
+  {
+    "id": 15,
+    "name": "Blouse Tulle Embroidery",
+    "category": "Blouse",
+    "price": 349000,
+    "rating": 4.5,
+    "image": "BlouseTulle.jpg",
+    "stock": 11,
+    "isAvailable": true,
+    "designer": {
+      "name": "Dewi Lestari",
+      "city": "Solo",
+      "experience_years": 8
+    },
+    "material": {
+      "fabric_type": "Brokat",
+      "is_premium": true,
+      "comfort_level": "Medium"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": false,
+      "xl": false,
+      "is_available": true
+    }
+  },
+  {
+    "id": 16,
+    "name": "Outer Denim Jaket",
+    "category": "Outer",
+    "price": 279000,
+    "rating": 4.4,
+    "image": "OuterDenim.jpg",
+    "stock": 16,
+    "isAvailable": true,
+    "designer": {
+      "name": "Maya Sari",
+      "city": "Yogyakarta",
+      "experience_years": 4
+    },
+    "material": {
+      "fabric_type": "Katun",
+      "is_premium": false,
+      "comfort_level": "High"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": true,
+      "xl": true,
+      "is_available": true
+    }
+  },
+  {
+    "id": 17,
+    "name": "Gamis Crincle Air",
+    "category": "Gamis",
+    "price": 389000,
+    "rating": 4.5,
+    "image": "GamisCrincle.jpg",
+    "stock": 13,
+    "isAvailable": true,
+    "designer": {
+      "name": "Fatimah Azzahra",
+      "city": "Surabaya",
+      "experience_years": 6
+    },
+    "material": {
+      "fabric_type": "Katun",
+      "is_premium": false,
+      "comfort_level": "High"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": true,
+      "xl": false,
+      "is_available": true
+    }
+  },
+  {
+    "id": 18,
+    "name": "Rok Payet Mermaid",
+    "category": "Rok",
+    "price": 459000,
+    "rating": 4.7,
+    "image": "RokPayet.jpg",
+    "stock": 6,
+    "isAvailable": true,
+    "designer": {
+      "name": "Putri Nabila",
+      "city": "Bandung",
+      "experience_years": 3
+    },
+    "material": {
+      "fabric_type": "Brokat",
+      "is_premium": true,
+      "comfort_level": "Low"
+    },
+    "size": {
+      "s": false,
+      "m": true,
+      "l": true,
+      "xl": false,
+      "is_available": true
+    }
+  },
+  {
+    "id": 19,
+    "name": "Kebaya Modern Lace",
+    "category": "Kebaya",
+    "price": 990000,
+    "rating": 4.8,
+    "image": "Kebaya.jpg",
+    "stock": 8,
+    "isAvailable": true,
+    "designer": {
+      "name": "Ratna Dewi",
+      "city": "Jakarta",
+      "experience_years": 12
+    },
+    "material": {
+      "fabric_type": "Silk",
+      "is_premium": true,
+      "comfort_level": "High"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": true,
+      "xl": true,
+      "is_available": true
+    }
+  },
+  {
+    "id": 20,
+    "name": "Dress Pesta Organza",
+    "category": "Dress",
+    "price": 789000,
+    "rating": 4.9,
+    "image": "DressPesta.jpg",
+    "stock": 5,
+    "isAvailable": true,
+    "designer": {
+      "name": "Sari Anggraeni",
+      "city": "Bandung",
+      "experience_years": 5
+    },
+    "material": {
+      "fabric_type": "Brokat",
+      "is_premium": true,
+      "comfort_level": "Medium"
+    },
+    "size": {
+      "s": true,
+      "m": true,
+      "l": false,
+      "xl": false,
+      "is_available": true
+    }
+  }
+]
