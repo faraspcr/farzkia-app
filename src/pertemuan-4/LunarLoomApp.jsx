@@ -28,7 +28,7 @@ export default function LunarLoomApp() {
             item.designer.name.toLowerCase().includes(filters.search.toLowerCase());
         
         const matchesCategory = filters.category ? item.category === filters.category : true;
-        
+
         const matchesFabric = filters.fabricType ? item.material.fabric_type === filters.fabricType : true;
         
         return matchesSearch && matchesCategory && matchesFabric;
