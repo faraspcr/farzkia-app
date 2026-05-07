@@ -1,121 +1,62 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import './index.css';
+import { Route, Routes } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
+import Loading from './components/LoadingSpinner';
+
+// Layouts
+import MainLayout from './layouts/MainLayout';
+import AuthLayout from './layouts/AuthLayout';
+
+// Pages
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const CustomersPage = lazy(() => import('./pages/CustomersPage'));
+const TransactionsPage = lazy(() => import('./pages/TransactionsPage'));
+const StockPage = lazy(() => import('./pages/StockPage'));
+const PreOrderPage = lazy(() => import('./pages/PreOrderPage'));
+const LoyaltyPage = lazy(() => import('./pages/LoyaltyPage'));
+const SegmentationPage = lazy(() => import('./pages/SegmentationPage'));
+const FeedbackPage = lazy(() => import('./pages/FeedbackPage'));
+const TrackingPage = lazy(() => import('./pages/TrackingPage'));
+const ReportsPage = lazy(() => import('./pages/ReportsPage'));
+const OmnichannelPage = lazy(() => import('./pages/OmnichannelPage'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+
+// Auth Pages
+const Login = lazy(() => import('./pages/auth/Login'));
+const Register = lazy(() => import('./pages/auth/Register'));
+const Forgot = lazy(() => import('./pages/auth/Forgot'));
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <Suspense fallback={<Loading />}>
+      <Routes>
+        {/* MainLayout */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/customers" element={<CustomersPage />} />
+          <Route path="/transactions" element={<TransactionsPage />} />
+          <Route path="/stock" element={<StockPage />} />
+          <Route path="/preorder" element={<PreOrderPage />} />
+          <Route path="/loyalty" element={<LoyaltyPage />} />
+          <Route path="/segmentation" element={<SegmentationPage />} />
+          <Route path="/feedback" element={<FeedbackPage />} />
+          <Route path="/tracking/:id" element={<TrackingPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/omnichannel" element={<OmnichannelPage />} />
+        </Route>
 
-      <div className="ticks"></div>
+        {/* AuthLayout */}
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot" element={<Forgot />} />
+        </Route>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {/* 404 Not Found */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
+  );
 }
 
-export default App
+export default App;
