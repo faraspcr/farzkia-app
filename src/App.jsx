@@ -10,6 +10,7 @@ import AuthLayout from './layouts/AuthLayout';
 // Pages
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const CustomersPage = lazy(() => import('./pages/CustomersPage'));
+const CustomerDetailPage = lazy(() => import('./pages/CustomerDetailPage')); // 👈 TAMBAHKAN INI
 const TransactionsPage = lazy(() => import('./pages/TransactionsPage'));
 const StockPage = lazy(() => import('./pages/StockPage'));
 const PreOrderPage = lazy(() => import('./pages/PreOrderPage'));
@@ -34,6 +35,7 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/customers" element={<CustomersPage />} />
+          <Route path="/customers/:id" element={<CustomerDetailPage />} /> {/* 👈 DYNAMIC ROUTE */}
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/stock" element={<StockPage />} />
           <Route path="/preorder" element={<PreOrderPage />} />

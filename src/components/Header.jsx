@@ -1,9 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaBell, FaSearch, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+import {
+  FaBars,
+  FaBell,
+  FaSearch,
+  FaSignOutAlt,
+  FaChevronDown,
+  FaRegCommentDots
+} from 'react-icons/fa';
 
 export default function Header({ toggleSidebar }) {
   const navigate = useNavigate();
+
   const [searchOpen, setSearchOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
 
@@ -13,51 +21,116 @@ export default function Header({ toggleSidebar }) {
   };
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-10">
-      <div className="flex items-center justify-between px-6 py-3">
+    <header className="bg-white border-b border-[#D7DBEC] sticky top-0 z-10 w-full">
+      <div className="flex items-center justify-between px-6 py-3 w-full">
+
+        {/* LEFT SECTION - Toggle + Search */}
         <div className="flex items-center gap-4">
-          <button onClick={toggleSidebar} className="text-gray-600 hover:text-blue-700">
+          <button
+            onClick={toggleSidebar}
+            className="text-[#5A607F] hover:text-[#1E5EFF] transition"
+          >
             <FaBars size={18} />
           </button>
-          <div className="relative">
-            <button onClick={() => setSearchOpen(true)} className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200">
-              <FaSearch className="text-gray-400 text-sm" />
-              <span className="text-gray-500 text-sm hidden md:inline">Cari pelanggan, transaksi...</span>
-            </button>
+
+          <div className="hidden md:flex items-center gap-2">
+            <FaSearch className="text-[#A1A7C4] text-lg" />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="bg-transparent outline-none text-[#131523] placeholder:text-[#A1A7C4] text-sm w-64"
+            />
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <FaBell className="text-gray-500 text-lg cursor-pointer hover:text-blue-700" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+
+        {/* RIGHT SECTION */}
+        <div className="flex items-center gap-5">
+          {/* Message Icon */}
+          <button className="text-[#A1A7C4] hover:text-[#1E5EFF] transition text-xl">
+            <FaRegCommentDots />
+          </button>
+
+          {/* Notification Bell */}
+          <div className="relative cursor-pointer">
+            <FaBell className="text-[#A1A7C4] text-xl hover:text-[#1E5EFF] transition" />
+            <span className="absolute -top-2 -right-2 bg-[#1E5EFF] text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-semibold">
+              5
+            </span>
           </div>
-          <div className="flex items-center gap-2 border-l pl-4 border-gray-200">
-            <FaUserCircle className="text-gray-500 text-2xl" />
-            <div className="hidden md:block">
-              <p className="text-sm font-medium">Admin</p>
-              <p className="text-xs text-gray-500">Toko Buku Cendekia</p>
+
+          {/* Profile Section - Avatar LOOPY + Name + Role */}
+          <div className="flex items-center gap-2 cursor-pointer">
+            {/* Avatar Loopy */}
+            <div className="w-9 h-9 rounded-full overflow-hidden bg-pink-100 flex items-center justify-center">
+              <img
+                src="https://i.pinimg.com/564x/4d/5c/4c/4d5c4c6d4e6d4f4d4c4d4c4d4c4d4c4d.jpg"
+                alt="Loopy"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "https://i.pinimg.com/564x/7e/5c/8a/7e5c8a6d5e4d3c2b1a0f9e8d7c6b5a4f.jpg";
+                }}
+              />
             </div>
+
+            {/* Name & Role */}
+            <div className="hidden md:block">
+              <span className="text-[#131523] text-sm font-medium">
+                Admin
+              </span>
+              <p className="text-[#7E84A3] text-xs -mt-0.5">
+                Admin Toko Cendekia
+              </p>
+            </div>
+
+            {/* Chevron Down */}
+            <FaChevronDown className="text-[#A1A7C4] text-xs" />
           </div>
-          <button onClick={handleLogout} className="flex items-center gap-2 text-red-600 hover:bg-red-50 px-3 py-1 rounded-lg">
-            <FaSignOutAlt size={14} />
-            <span className="text-sm hidden md:inline">Logout</span>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="text-[#F0142F] hover:bg-[#FDE7EA] p-2 rounded-lg transition ml-2"
+          >
+            <FaSignOutAlt size={16} />
           </button>
         </div>
       </div>
 
+      {/* SEARCH MODAL MOBILE */}
       {searchOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setSearchOpen(false)}>
-          <div className="bg-white rounded-2xl p-6 w-96 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-semibold mb-3">🔍 Cari Data</h2>
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+          onClick={() => setSearchOpen(false)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 w-96 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-semibold mb-3 text-[#131523]">
+              Cari Data
+            </h2>
+
             <input
               type="text"
-              className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full border border-[#D7DBEC] p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1E5EFF] text-[#131523] placeholder:text-[#A1A7C4]"
               placeholder="Cari pelanggan, order..."
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
             />
-            {keyword && <p className="text-sm text-gray-500 mt-3">Hasil pencarian: <b>{keyword}</b></p>}
-            <button className="mt-4 w-full bg-blue-700 text-white py-2 rounded-lg hover:bg-blue-800" onClick={() => setSearchOpen(false)}>Tutup</button>
+
+            {keyword && (
+              <p className="text-sm text-[#7E84A3] mt-3">
+                Hasil pencarian: <b>{keyword}</b>
+              </p>
+            )}
+
+            <button
+              className="mt-4 w-full bg-[#1E5EFF] text-white py-2 rounded-lg hover:bg-blue-700 transition"
+              onClick={() => setSearchOpen(false)}
+            >
+              Tutup
+            </button>
           </div>
         </div>
       )}

@@ -3,8 +3,7 @@ import {
   FaWhatsapp,
   FaStore,
   FaShopify,
-  FaBullhorn,
-  FaChartBar
+  FaBullhorn
 } from 'react-icons/fa';
 
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -68,13 +67,11 @@ export default function OmnichannelPage() {
   ];
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">
-          Omnichannel
-        </h2>
-        <p className="text-gray-600 mt-1">
+      <div>
+        <h1 className="text-2xl font-bold text-[#131523]">Omnichannel</h1>
+        <p className="text-sm text-[#7E84A3] mt-1">
           Integrasi multi-channel untuk retensi pelanggan
         </p>
       </div>
@@ -85,34 +82,34 @@ export default function OmnichannelPage() {
       ) : (
         <>
           {/* Channel Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {channels.map((ch) => (
               <div
                 key={ch.name}
-                className="bg-white rounded-xl shadow-md p-6 text-center hover:shadow-lg transition"
+                className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-6 text-center hover:shadow-md transition"
               >
                 <div
                   className={`w-16 h-16 ${ch.color} rounded-full flex items-center justify-center mx-auto mb-4`}
                 >
                   <ch.icon className="text-2xl" />
                 </div>
-                <h3 className="font-bold text-lg text-gray-800">
+                <h3 className="font-bold text-lg text-[#131523]">
                   {ch.name}
                 </h3>
-                <p className="text-3xl font-bold mt-2 text-gray-900">
+                <p className="text-3xl font-bold mt-2 text-[#1E5EFF]">
                   {ch.count}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-[#7E84A3] mt-1">
                   Total Transaksi
                 </p>
               </div>
             ))}
           </div>
 
-          {/* Campaign */}
-          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <h3 className="font-bold text-lg mb-4 flex items-center">
-              <FaBullhorn className="mr-2 text-pink-500" />
+          {/* Campaign Aktif */}
+          <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-6">
+            <h3 className="font-bold text-lg mb-4 flex items-center text-[#131523]">
+              <FaBullhorn className="mr-2 text-[#F99600]" />
               Campaign Aktif
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -121,23 +118,23 @@ export default function OmnichannelPage() {
                 .map((c) => (
                   <div
                     key={c.id}
-                    className="border rounded-lg p-4 hover:shadow-md transition"
+                    className="border border-[#D7DBEC] rounded-lg p-4 hover:shadow-md transition"
                   >
                     <div className="flex justify-between items-center">
-                      <h4 className="font-semibold text-gray-800">
+                      <h4 className="font-semibold text-[#131523]">
                         {c.name}
                       </h4>
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                      <span className="text-xs bg-[#DAF9EC] text-[#06A561] px-2 py-1 rounded-full">
                         Aktif
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-2">
+                    <p className="text-sm text-[#5A607F] mt-2">
                       {c.description}
                     </p>
-                    <p className="text-xs text-gray-500 mt-3">
+                    <p className="text-xs text-[#7E84A3] mt-3">
                       Target: {c.target}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-[#7E84A3]">
                       Diskon: {c.discount}%
                     </p>
                   </div>
@@ -145,40 +142,10 @@ export default function OmnichannelPage() {
             </div>
           </div>
 
-          {/* Strategy */}
-          <div className="bg-gradient-to-r from-blue-900 to-blue-700 rounded-xl shadow-md p-6 text-white">
-            <div className="flex items-center gap-4">
-              <FaChartBar className="text-4xl" />
-              <div>
-                <h3 className="font-bold text-xl">
-                  Strategi Omnichannel Retensi
-                </h3>
-                <p className="text-blue-200 text-sm mt-1">
-                  Acquisition → Retention → Expansion
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-              <div className="bg-white/10 rounded-lg p-4">
-                <p className="font-semibold text-lg">📱 Acquisition</p>
-                <p className="text-sm text-blue-100 mt-2">
-                  Pelanggan baru melalui WhatsApp dan Shopee
-                </p>
-              </div>
-              <div className="bg-white/10 rounded-lg p-4">
-                <p className="font-semibold text-lg">💬 Retention</p>
-                <p className="text-sm text-blue-100 mt-2">
-                  Broadcast promo dan notifikasi berkala
-                </p>
-              </div>
-              <div className="bg-white/10 rounded-lg p-4">
-                <p className="font-semibold text-lg">🚀 Expansion</p>
-                <p className="text-sm text-blue-100 mt-2">
-                  Win-back promo dan pre-order prioritas
-                </p>
-              </div>
-            </div>
+          {/* Footer */}
+          <div className="text-center text-xs text-[#A1A7C4] py-4">
+            <p>Jl. Paus No.73, Pekanbaru</p>
+            <p>© 2025 Toko Buku Cendekia</p>
           </div>
         </>
       )}
