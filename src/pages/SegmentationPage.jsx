@@ -1,9 +1,15 @@
+// src/pages/SegmentationPage.jsx
 import { useState, useEffect } from 'react';
 import { FaUsers } from 'react-icons/fa';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { getCustomers, getCustomerStats } from '../data/customers';
 import CustomerTable from '../components/CustomerTable';
 import LoadingSpinner from '../components/LoadingSpinner';
+
+// IMPORT KOMPONEN YANG SUDAH ADA (Card TIDAK diimport)
+import Container from '../components/Container';
+import PageHeader from '../components/PageHeader';
+import SectionTitle from '../components/SectionTitle';
 
 export default function SegmentationPage() {
   const [customers, setCustomers] = useState([]);
@@ -36,16 +42,20 @@ export default function SegmentationPage() {
   const segments = [
     { value: 'all', label: 'Semua', icon: '👥' },
     { value: 'ortu_murid', label: 'Orang Tua', icon: '👨‍👩‍👧' },
-    { value: 'santri', label: ' Santri', icon: '🕌' },
+    { value: 'santri', label: 'Santri', icon: '🕌' },
     { value: 'mahasiswa_umum', label: 'Mahasiswa/Umum', icon: '🎓' }
   ];
 
   return (
-    <div>
-     <h2 className="text-2xl font-bold text-gray-800 mb-6">Segmentasi Pelanggan</h2>
+    <Container>
+      {/* PAKAI PAGEHEADER */}
+      <PageHeader 
+        title="Segmentasi Pelanggan" 
+        description="Analisis dan filter pelanggan berdasarkan kategori"
+      />
       
-      {/* Filter Segmentasi */}
-      <div className="bg-white rounded-xl shadow-md p-4 mb-6">
+      {/* Filter Segmentasi - TETAP MANUAL */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
         <div className="flex flex-wrap gap-2">
           {segments.map(seg => (
             <button 
@@ -64,11 +74,11 @@ export default function SegmentationPage() {
         </div>
       </div>
       
-      {/* Charts */}
+      {/* Charts - PAKAI DIV BIASA (bukan Card) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Pie Chart */}
-        <div className="bg-white rounded-xl shadow-md p-5">
-          <h3 className="font-bold text-lg mb-4">📊 Distribusi Kategori</h3>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <SectionTitle title="📊 Distribusi Kategori" className="border-0 p-0 m-0 mb-4" />
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie 
@@ -88,8 +98,8 @@ export default function SegmentationPage() {
         </div>
         
         {/* Bar Chart */}
-        <div className="bg-white rounded-xl shadow-md p-5">
-          <h3 className="font-bold text-lg mb-4">📊 Distribusi Member Level</h3>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <SectionTitle title="📊 Distribusi Member Level" className="border-0 p-0 m-0 mb-4" />
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={levelData}>
               <XAxis dataKey="name" />
@@ -104,13 +114,18 @@ export default function SegmentationPage() {
       </div>
       
       {/* Customer Table by Segment */}
-      <div className="bg-white rounded-xl shadow-md p-5">
-        <h3 className="font-bold text-lg mb-4 flex items-center">
-          <FaUsers className="mr-2 text-blue-600" /> 
-          Daftar Pelanggan - {segments.find(s => s.value === selectedSegment)?.label}
-        </h3>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <SectionTitle 
+          title={
+            <div className="flex items-center">
+              <FaUsers className="mr-2 text-blue-600" /> 
+              Daftar Pelanggan - {segments.find(s => s.value === selectedSegment)?.label}
+            </div>
+          } 
+          className="border-0 p-0 m-0 mb-4"
+        />
         {loading ? <LoadingSpinner /> : <CustomerTable customers={customers} onDelete={() => {}} />}
       </div>
-    </div>
+    </Container>
   );
 }

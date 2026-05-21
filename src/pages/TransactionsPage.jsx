@@ -1,9 +1,19 @@
+// src/pages/TransactionsPage.jsx
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaSearch, FaEye, FaChevronLeft, FaChevronRight, FaShoppingBag, FaStore, FaWhatsapp, FaShopify } from 'react-icons/fa';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { getTransactions } from '../data/transactions';
 import { formatRupiah, formatShortDate } from '../data/formatters';
+
+// IMPORT KOMPONEN YANG SUDAH ADA
+import Button from '../components/Button';
+import Container from '../components/Container';
+import PageHeader from '../components/PageHeader';
+import SearchBar from '../components/SearchBar';
+import Badge from '../components/Badge';
+import PriceDisplay from '../components/PriceDisplay';
+import TransactionBadge from '../components/TransactionBadge';
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
@@ -26,7 +36,6 @@ export default function TransactionsPage() {
 
   const loadTransactions = () => {
     const data = getTransactions();
-    // Urutkan dari yang terbaru
     const sorted = [...data].sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
     setTransactions(sorted);
     setLoading(false);
@@ -58,23 +67,12 @@ export default function TransactionsPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedTransactions = filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
 
-  // Status Badge dengan warna Figma
+  // PAKAI TRANSACTIONBADGE COMPONENT
   const getStatusBadge = (status) => {
-    switch(status) {
-      case 'selesai':
-        return <span className="px-2 py-1 rounded-full text-xs bg-[#DAF9EC] text-[#06A561]">Selesai</span>;
-      case 'siap_diambil':
-        return <span className="px-2 py-1 rounded-full text-xs bg-[#FFF9E1] text-[#F99600]">Siap Diambil</span>;
-      case 'diproses':
-        return <span className="px-2 py-1 rounded-full text-xs bg-[#ECF2FF] text-[#1E5EFF]">Sedang Diproses</span>;
-      case 'pesanan_diterima':
-        return <span className="px-2 py-1 rounded-full text-xs bg-[#E6E9F4] text-[#5A607F]">Pesanan Diterima</span>;
-      default:
-        return <span className="px-2 py-1 rounded-full text-xs bg-[#F5F6FA] text-[#7E84A3]">{status}</span>;
-    }
+    return <TransactionBadge status={status} />;
   };
 
-  // Source Badge
+  // Source Badge - TETAP MANUAL (karena bukan komponen yang tersedia)
   const getSourceBadge = (source) => {
     switch(source) {
       case 'offline':
@@ -91,147 +89,84 @@ export default function TransactionsPage() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold text-[#131523]">Riwayat Transaksi</h1>
-          <p className="text-[#7E84A3] ">Kelola dan pantau semua transaksi toko</p>
-        </div>
-        <Link 
-          to="/transactions/add" 
-          className="bg-[#1E5EFF] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition"
-        >
-          <FaPlus size={14} /> Tambah Transaksi
-        </Link>
+    <Container>
+      {/* Header - PAKAI PAGEHEADER dan BUTTON */}
+      <div className="flex justify-between items-center mb-6">
+        <PageHeader 
+          title="Riwayat Transaksi" 
+          description="Kelola dan pantau semua transaksi toko"
+        />
+        <Button type="primary">
+          <FaPlus size={14} className="mr-2" /> Tambah Transaksi
+        </Button>
       </div>
 
-      {/* Filter dan Search - BEDA dengan Pelanggan (pakai 2 row) */}
-      <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-4">
+      {/* Filter - TETAP MANUAL (karena tidak ada komponen filter) */}
+      <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-4 mb-6">
         {/* Row 1: Status Filter */}
         <div className="flex flex-wrap items-center gap-3 mb-3">
           <span className="text-sm text-[#7E84A3]">Status:</span>
           <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setStatusFilter('all')}
-              className={`px-3 py-1.5 rounded-lg text-sm transition ${
-                statusFilter === 'all' 
-                  ? 'bg-[#1E5EFF] text-white' 
-                  : 'bg-[#F5F6FA] text-[#5A607F] hover:bg-[#E6E9F4]'
-              }`}
-            >
-              Semua
-            </button>
-            <button
-              onClick={() => setStatusFilter('pesanan_diterima')}
-              className={`px-3 py-1.5 rounded-lg text-sm transition ${
-                statusFilter === 'pesanan_diterima' 
-                  ? 'bg-[#1E5EFF] text-white' 
-                  : 'bg-[#F5F6FA] text-[#5A607F] hover:bg-[#E6E9F4]'
-              }`}
-            >
-              Diterima
-            </button>
-            <button
-              onClick={() => setStatusFilter('diproses')}
-              className={`px-3 py-1.5 rounded-lg text-sm transition ${
-                statusFilter === 'diproses' 
-                  ? 'bg-[#1E5EFF] text-white' 
-                  : 'bg-[#F5F6FA] text-[#5A607F] hover:bg-[#E6E9F4]'
-              }`}
-            >
-              Diproses
-            </button>
-            <button
-              onClick={() => setStatusFilter('siap_diambil')}
-              className={`px-3 py-1.5 rounded-lg text-sm transition ${
-                statusFilter === 'siap_diambil' 
-                  ? 'bg-[#1E5EFF] text-white' 
-                  : 'bg-[#F5F6FA] text-[#5A607F] hover:bg-[#E6E9F4]'
-              }`}
-            >
-              Siap Diambil
-            </button>
-            <button
-              onClick={() => setStatusFilter('selesai')}
-              className={`px-3 py-1.5 rounded-lg text-sm transition ${
-                statusFilter === 'selesai' 
-                  ? 'bg-[#1E5EFF] text-white' 
-                  : 'bg-[#F5F6FA] text-[#5A607F] hover:bg-[#E6E9F4]'
-              }`}
-            >
-              Selesai
-            </button>
+            {['all', 'pesanan_diterima', 'diproses', 'siap_diambil', 'selesai'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setStatusFilter(status)}
+                className={`px-3 py-1.5 rounded-lg text-sm transition ${
+                  statusFilter === status 
+                    ? 'bg-[#1E5EFF] text-white' 
+                    : 'bg-[#F5F6FA] text-[#5A607F] hover:bg-[#E6E9F4]'
+                }`}
+              >
+                {status === 'all' ? 'Semua' : 
+                 status === 'pesanan_diterima' ? 'Diterima' :
+                 status === 'diproses' ? 'Diproses' :
+                 status === 'siap_diambil' ? 'Siap Diambil' : 'Selesai'}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Row 2: Source Filter + Search */}
+        {/* Row 2: Source Filter + Search - PAKAI SEARCHBAR */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#D7DBEC]">
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#7E84A3]">Sumber:</span>
             <div className="flex gap-2">
-              <button
-                onClick={() => setSourceFilter('all')}
-                className={`px-3 py-1.5 rounded-lg text-sm transition ${
-                  sourceFilter === 'all' 
-                    ? 'bg-[#1E5EFF] text-white' 
-                    : 'bg-[#F5F6FA] text-[#5A607F] hover:bg-[#E6E9F4]'
-                }`}
-              >
-                Semua
-              </button>
-              <button
-                onClick={() => setSourceFilter('offline')}
-                className={`px-3 py-1.5 rounded-lg text-sm transition flex items-center gap-1 ${
-                  sourceFilter === 'offline' 
-                    ? 'bg-[#1E5EFF] text-white' 
-                    : 'bg-[#F5F6FA] text-[#5A607F] hover:bg-[#E6E9F4]'
-                }`}
-              >
-                <FaStore size={10} /> Offline
-              </button>
-              <button
-                onClick={() => setSourceFilter('whatsapp')}
-                className={`px-3 py-1.5 rounded-lg text-sm transition flex items-center gap-1 ${
-                  sourceFilter === 'whatsapp' 
-                    ? 'bg-[#1E5EFF] text-white' 
-                    : 'bg-[#F5F6FA] text-[#5A607F] hover:bg-[#E6E9F4]'
-                }`}
-              >
-                <FaWhatsapp size={10} /> WhatsApp
-              </button>
-              <button
-                onClick={() => setSourceFilter('shopee')}
-                className={`px-3 py-1.5 rounded-lg text-sm transition flex items-center gap-1 ${
-                  sourceFilter === 'shopee' 
-                    ? 'bg-[#1E5EFF] text-white' 
-                    : 'bg-[#F5F6FA] text-[#5A607F] hover:bg-[#E6E9F4]'
-                }`}
-              >
-                <FaShopify size={10} /> Shopee
-              </button>
+              {['all', 'offline', 'whatsapp', 'shopee'].map((source) => (
+                <button
+                  key={source}
+                  onClick={() => setSourceFilter(source)}
+                  className={`px-3 py-1.5 rounded-lg text-sm transition flex items-center gap-1 ${
+                    sourceFilter === source 
+                      ? 'bg-[#1E5EFF] text-white' 
+                      : 'bg-[#F5F6FA] text-[#5A607F] hover:bg-[#E6E9F4]'
+                  }`}
+                >
+                  {source === 'all' ? 'Semua' :
+                   source === 'offline' ? <FaStore size={10} /> :
+                   source === 'whatsapp' ? <FaWhatsapp size={10} /> :
+                   <FaShopify size={10} />}
+                  {source !== 'all' && (source === 'offline' ? ' Offline' : 
+                    source === 'whatsapp' ? ' WhatsApp' : ' Shopee')}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="relative w-full md:w-80">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A7C4] text-sm" />
-            <input
-              type="text"
+          {/* PAKAI SEARCHBAR */}
+          <div className="w-full md:w-80">
+            <SearchBar 
               placeholder="Cari nama pelanggan atau ID transaksi..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-[#D7DBEC] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E5EFF] text-[#131523] placeholder:text-[#A1A7C4] bg-white"
+              onChange={setSearchTerm}
             />
           </div>
         </div>
       </div>
 
-      {/* Tabel Data - Desain Card/Grid berbeda dari Pelanggan */}
+      {/* Tabel Data - PAKAI PRICEDISPLAY */}
       <div className="grid grid-cols-1 gap-4">
         {paginatedTransactions.map((transaction) => (
           <div key={transaction.id} className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-4 hover:shadow-md transition">
-            {/* Header Card */}
             <div className="flex justify-between items-start mb-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-[#F5F6FA] rounded-xl flex items-center justify-center">
@@ -246,12 +181,12 @@ export default function TransactionsPage() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-lg font-bold text-[#1E5EFF]">{formatRupiah(transaction.total)}</p>
+                {/* PAKAI PRICEDISPLAY */}
+                <PriceDisplay amount={transaction.total} className="text-lg font-bold text-[#1E5EFF]" />
                 {getSourceBadge(transaction.source)}
               </div>
             </div>
 
-            {/* Detail Transaksi */}
             <div className="flex flex-wrap items-center justify-between pt-3 border-t border-[#D7DBEC]">
               <div>
                 <p className="text-sm font-medium text-[#131523]">{transaction.customerName}</p>
@@ -279,20 +214,21 @@ export default function TransactionsPage() {
         </div>
       )}
 
-      {/* Pagination */}
+      {/* Pagination - PAKAI BUTTON */}
       {totalPages > 1 && (
-        <div className="flex justify-between items-center p-4 bg-white rounded-xl shadow-sm border border-[#D7DBEC]">
+        <div className="flex justify-between items-center p-4 bg-white rounded-xl shadow-sm border border-[#D7DBEC] mt-6">
           <div className="text-sm text-[#7E84A3]">
             Menampilkan {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredTransactions.length)} dari {filteredTransactions.length} transaksi
           </div>
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              type="secondary"
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg border border-[#D7DBEC] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#F5F6FA] text-[#5A607F]"
+              className="p-2"
             >
               <FaChevronLeft size={14} />
-            </button>
+            </Button>
             {[...Array(Math.min(totalPages, 5))].map((_, idx) => {
               let pageNum;
               if (totalPages <= 5) {
@@ -305,26 +241,24 @@ export default function TransactionsPage() {
                 pageNum = currentPage - 2 + idx;
               }
               return (
-                <button
+                <Button
                   key={idx}
+                  type={currentPage === pageNum ? "primary" : "secondary"}
                   onClick={() => setCurrentPage(pageNum)}
-                  className={`px-3 py-1 rounded-lg transition ${
-                    currentPage === pageNum
-                      ? 'bg-[#1E5EFF] text-white'
-                      : 'text-[#7E84A3] hover:bg-[#F5F6FA]'
-                  }`}
+                  className="px-3 py-1"
                 >
                   {pageNum}
-                </button>
+                </Button>
               );
             })}
-            <button
+            <Button
+              type="secondary"
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="p-2 rounded-lg border border-[#D7DBEC] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#F5F6FA] text-[#5A607F]"
+              className="p-2"
             >
               <FaChevronRight size={14} />
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -334,6 +268,6 @@ export default function TransactionsPage() {
         <p>Jl. Paus No.73, Pekanbaru</p>
         <p>© 2025 Toko Buku Cendekia</p>
       </div>
-    </div>
+    </Container>
   );
 }

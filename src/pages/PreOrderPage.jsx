@@ -1,7 +1,13 @@
+// src/pages/PreOrderPage.jsx
 import { useState, useEffect } from 'react';
 import { FaBell, FaCheckCircle, FaClock } from 'react-icons/fa';
 import LoadingSpinner from '../components/LoadingSpinner';
 import WhatsAppButton from '../components/WhatsAppButton';
+import Button from '../components/Button';
+import Badge from '../components/Badge';
+import Container from '../components/Container';
+import PageHeader from '../components/PageHeader';
+import PreOrderCard from '../components/PreOrderCard';
 import { getPreorders, updatePreorderStatus } from '../data/preorders';
 import { formatDate } from '../data/formatters';
 
@@ -35,25 +41,25 @@ export default function PreOrderPage() {
     return 'Sudah Terpenuhi';
   };
 
-  const getStatusColor = (status) => {
-    if (status === 'waiting_stock') return 'bg-yellow-100 text-yellow-800';
-    if (status === 'notified') return 'bg-blue-100 text-blue-800';
-    return 'bg-green-100 text-green-800';
+  const getStatusBadge = (status) => {
+    if (status === 'waiting_stock') return <Badge type="warning">Menunggu Stok</Badge>;
+    if (status === 'notified') return <Badge type="success">Sudah Diberitahu</Badge>;
+    return <Badge type="gray">Sudah Terpenuhi</Badge>;
   };
 
   return (
-    <div>
-      <div className="mb-6">
-        {/* Judul - SUDAH DIPERBAIKI */}
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Pre-Order & Notifikasi Stok</h2>
-      </div>
+    <Container>
+      <PageHeader 
+        title="Pre-Order & Notifikasi Stok" 
+        description="Kelola permintaan pre-order dan notifikasi stok kosong"
+      />
       
       {loading ? (
         <LoadingSpinner />
       ) : (
         <div className="grid grid-cols-1 gap-5">
           {preorders.map(p => (
-            <div key={p.id} className="bg-white rounded-xl shadow-md p-5 hover:shadow-lg transition">
+            <div key={p.id} className="bg-white rounded-xl shadow-md p-5 hover:shadow-lg transition border border-gray-100">
               <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                 {/* Kiri: Info Pre-order */}
                 <div className="flex gap-4 flex-1">
@@ -67,22 +73,18 @@ export default function PreOrderPage() {
                       <p className="text-blue-600 text-sm mt-1">Estimasi tiba: {formatDate(p.estimatedArrival)}</p>
                     )}
                     <div className="mt-2">
-                      <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(p.status)}`}>
-                        {getStatusLabel(p.status)}
-                      </span>
+                      {/* PAKAI BADGE COMPONENT */}
+                      {getStatusBadge(p.status)}
                     </div>
                   </div>
                 </div>
                 
-                {/* Kanan: Aksi */}
+                {/* Kanan: Aksi - WA & NOTIFIKASI TETAP ADA */}
                 <div className="flex gap-2">
                   {p.status === 'waiting_stock' && (
-                    <button 
-                      onClick={() => handleNotify(p)} 
-                      className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-                    >
-                      <FaBell /> Notifikasi
-                    </button>
+                    <Button type="primary" onClick={() => handleNotify(p)}>
+                      <FaBell className="mr-2" /> Notifikasi
+                    </Button>
                   )}
                   <WhatsAppButton 
                     phoneNumber={p.customerPhone} 
@@ -95,12 +97,12 @@ export default function PreOrderPage() {
           ))}
           
           {preorders.length === 0 && (
-            <div className="bg-white rounded-xl shadow-md p-8 text-center">
+            <div className="bg-white rounded-xl shadow-md p-8 text-center border border-gray-100">
               <p className="text-gray-500">Belum ada permintaan pre-order</p>
             </div>
           )}
         </div>
       )}
-    </div>
+    </Container>
   );
 }

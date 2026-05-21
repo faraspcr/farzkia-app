@@ -1,8 +1,14 @@
+// src/pages/LoyaltyPage.jsx
 import { useState, useEffect } from 'react';
 import { FaTrophy } from 'react-icons/fa';
 import LoadingSpinner from '../components/LoadingSpinner';
 import LoyaltyBadge from '../components/LoyaltyBadge';
 import { getCustomers } from '../data/customers';
+
+// IMPORT KOMPONEN YANG ADA (Card TIDAK diimport)
+import Container from '../components/Container';
+import PageHeader from '../components/PageHeader';
+import SectionTitle from '../components/SectionTitle';
 
 export default function LoyaltyPage() {
   const [customers, setCustomers] = useState([]);
@@ -21,10 +27,13 @@ export default function LoyaltyPage() {
   ];
 
   return (
-    <div>
-<h2 className="text-2xl font-bold text-gray-800 mb-6">Program Loyalitas</h2>
+    <Container>
+      <PageHeader 
+        title="Program Loyalitas" 
+        description="Tingkatkan level untuk mendapatkan lebih banyak keuntungan"
+      />
       
-      {/* Level Cards */}
+      {/* Level Cards - PAKAI DIV BIASA (bukan import Card) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {levels.map(l => (
           <div key={l.level} className={`${l.color} rounded-xl shadow-md p-6 text-center border border-gray-100`}>
@@ -37,11 +46,16 @@ export default function LoyaltyPage() {
       </div>
       
       {/* Leaderboard */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <h3 className="text-lg font-bold mb-4 flex items-center">
-          <FaTrophy className="text-yellow-500 mr-2" /> 
-          Leaderboard Pelanggan
-        </h3>
+      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <SectionTitle 
+          title={
+            <div className="flex items-center">
+              <FaTrophy className="text-yellow-500 mr-2" /> 
+              Leaderboard Pelanggan
+            </div>
+          } 
+          className="border-0 p-0 m-0 mb-4"
+        />
         
         {loading ? (
           <LoadingSpinner />
@@ -76,6 +90,6 @@ export default function LoyaltyPage() {
           </div>
         )}
       </div>
-    </div>
+    </Container>
   );
 }

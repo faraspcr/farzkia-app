@@ -10,7 +10,7 @@ import AuthLayout from './layouts/AuthLayout';
 // Pages
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const CustomersPage = lazy(() => import('./pages/CustomersPage'));
-const CustomerDetailPage = lazy(() => import('./pages/CustomerDetailPage')); // 👈 TAMBAHKAN INI
+const CustomerDetailPage = lazy(() => import('./pages/CustomerDetailPage'));
 const TransactionsPage = lazy(() => import('./pages/TransactionsPage'));
 const StockPage = lazy(() => import('./pages/StockPage'));
 const PreOrderPage = lazy(() => import('./pages/PreOrderPage'));
@@ -22,6 +22,9 @@ const ReportsPage = lazy(() => import('./pages/ReportsPage'));
 const OmnichannelPage = lazy(() => import('./pages/OmnichannelPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
+// ⭐ INI YANG PENTING
+const ComponentsPage = lazy(() => import('./pages/components'));
+
 // Auth Pages
 const Login = lazy(() => import('./pages/auth/Login'));
 const Register = lazy(() => import('./pages/auth/Register'));
@@ -31,11 +34,10 @@ function App() {
   return (
     <Suspense fallback={<Loading />}>
       <Routes>
-        {/* MainLayout */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/customers" element={<CustomersPage />} />
-          <Route path="/customers/:id" element={<CustomerDetailPage />} /> {/* 👈 DYNAMIC ROUTE */}
+          <Route path="/customers/:id" element={<CustomerDetailPage />} /> 
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/stock" element={<StockPage />} />
           <Route path="/preorder" element={<PreOrderPage />} />
@@ -45,17 +47,18 @@ function App() {
           <Route path="/tracking/:id" element={<TrackingPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/omnichannel" element={<OmnichannelPage />} />
+          
+          {/* ⭐ ROUTE UNTUK COMPONENTS */}
+         <Route path="/components" element={<ComponentsPage />} />
         </Route>
 
-        {/* AuthLayout */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot" element={<Forgot />} />
         </Route>
 
-        {/* 404 Not Found */}
-        <Route path="*" element={<NotFound />} />
+        {/* <Route path="*" element={<NotFound />} /> */}
       </Routes>
     </Suspense>
   );

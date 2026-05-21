@@ -10,6 +10,7 @@ import {
   FaStar,
   FaFileAlt,
   FaStore
+  
 } from 'react-icons/fa';
 
 const menuItems = [
@@ -23,6 +24,7 @@ const menuItems = [
   { path: '/feedback', name: 'Feedback', icon: FaStar },
   { path: '/reports', name: 'Laporan', icon: FaFileAlt },
   { path: '/omnichannel', name: 'Omnichannel', icon: FaStore },
+{ path: '/components', name: 'Components',  icon: FaStore },
 ];
 
 export default function Sidebar() {

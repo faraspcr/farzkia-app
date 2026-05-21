@@ -1,3 +1,4 @@
+// src/pages/OmnichannelPage.jsx
 import { useState, useEffect } from 'react';
 import {
   FaWhatsapp,
@@ -8,6 +9,12 @@ import {
 
 import LoadingSpinner from '../components/LoadingSpinner';
 import { getTransactionStats } from '../data/transactions';
+
+// IMPORT KOMPONEN YANG ADA (Card TIDAK diimport)
+import Container from '../components/Container';
+import PageHeader from '../components/PageHeader';
+import SectionTitle from '../components/SectionTitle';
+import Badge from '../components/Badge';
 
 export default function OmnichannelPage() {
   const [stats, setStats] = useState(null);
@@ -67,22 +74,18 @@ export default function OmnichannelPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-[#131523]">Omnichannel</h1>
-        <p className="text-sm text-[#7E84A3] mt-1">
-          Integrasi multi-channel untuk retensi pelanggan
-        </p>
-      </div>
+    <Container>
+      <PageHeader 
+        title="Omnichannel" 
+        description="Integrasi multi-channel untuk retensi pelanggan"
+      />
 
-      {/* Loading */}
       {loading ? (
         <LoadingSpinner />
       ) : (
         <>
-          {/* Channel Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Channel Cards - PAKAI DIV BIASA (CARD BAWAAN) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             {channels.map((ch) => (
               <div
                 key={ch.name}
@@ -108,10 +111,15 @@ export default function OmnichannelPage() {
 
           {/* Campaign Aktif */}
           <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-6">
-            <h3 className="font-bold text-lg mb-4 flex items-center text-[#131523]">
-              <FaBullhorn className="mr-2 text-[#F99600]" />
-              Campaign Aktif
-            </h3>
+            <SectionTitle 
+              title={
+                <div className="flex items-center">
+                  <FaBullhorn className="mr-2 text-[#F99600]" />
+                  Campaign Aktif
+                </div>
+              } 
+              className="border-0 p-0 m-0 mb-4"
+            />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {campaigns
                 .filter((c) => c.status === 'active')
@@ -124,9 +132,7 @@ export default function OmnichannelPage() {
                       <h4 className="font-semibold text-[#131523]">
                         {c.name}
                       </h4>
-                      <span className="text-xs bg-[#DAF9EC] text-[#06A561] px-2 py-1 rounded-full">
-                        Aktif
-                      </span>
+                      <Badge type="success">Aktif</Badge>
                     </div>
                     <p className="text-sm text-[#5A607F] mt-2">
                       {c.description}
@@ -149,6 +155,6 @@ export default function OmnichannelPage() {
           </div>
         </>
       )}
-    </div>
+    </Container>
   );
 }

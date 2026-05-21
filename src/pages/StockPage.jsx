@@ -1,8 +1,18 @@
+// src/pages/StockPage.jsx
 import { useState, useEffect } from 'react';
-import { FaEdit, FaExclamationTriangle, FaSearch, FaChevronLeft, FaChevronRight, FaBox } from 'react-icons/fa';
+import { FaEdit, FaExclamationTriangle, FaChevronLeft, FaChevronRight, FaBox } from 'react-icons/fa';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { getProducts, updateProductStock, getLowStockProducts } from '../data/products';
 import { formatRupiah } from '../data/formatters';
+
+// IMPORT KOMPONEN YANG SUDAH ADA
+import Button from '../components/Button';
+import Container from '../components/Container';
+import PageHeader from '../components/PageHeader';
+import SearchBar from '../components/SearchBar';
+import Badge from '../components/Badge';
+import PriceDisplay from '../components/PriceDisplay';
+import StockBadge from '../components/StockBadge';
 
 export default function StockPage() {
   const [products, setProducts] = useState([]);
@@ -75,32 +85,32 @@ export default function StockPage() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-[#131523]">Manajemen Stok</h1>
-        <p className="text-[#7E84A3]">Kelola stok produk toko buku</p>
-      </div>
+    <Container>
+      {/* PAKAI PAGEHEADER */}
+      <PageHeader 
+        title="Manajemen Stok" 
+        description="Kelola stok produk toko buku"
+      />
 
-      {/* Alert Stok Menipis */}
+      {/* Alert Stok Menipis - PAKAI BADGE */}
       {lowStock.length > 0 && (
-        <div className="bg-[#FFF9E1] border border-[#FFE582] rounded-xl p-4">
+        <div className="bg-[#FFF9E1] border border-[#FFE582] rounded-xl p-4 mb-6">
           <div className="flex items-center gap-2 mb-2">
             <FaExclamationTriangle className="text-[#F99600]" />
             <h3 className="font-semibold text-[#131523]">Stok Menipis</h3>
           </div>
           <div className="flex flex-wrap gap-2">
             {lowStock.map(p => (
-              <span key={p.id} className="bg-[#FFECA3] text-[#F99600] px-3 py-1 rounded-full text-sm">
+              <Badge key={p.id} type="warning">
                 {p.name}: {p.stock}
-              </span>
+              </Badge>
             ))}
           </div>
         </div>
       )}
 
-      {/* Filter Kategori + Search */}
-      <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-4">
+      {/* Filter Kategori + Search - PAKAI SEARCHBAR */}
+      <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-4 mb-6">
         <div className="flex flex-wrap items-center gap-4">
           <select 
             value={filterCategory} 
@@ -112,14 +122,11 @@ export default function StockPage() {
             ))}
           </select>
 
-          <div className="flex-1 relative">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A7C4] text-sm" />
-            <input
-              type="text"
+          <div className="flex-1">
+            <SearchBar 
               placeholder="Cari nama produk..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-[#D7DBEC] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E5EFF] text-[#131523] placeholder:text-[#A1A7C4] bg-white"
+              onChange={setSearchTerm}
             />
           </div>
         </div>
@@ -147,8 +154,11 @@ export default function StockPage() {
                       <FaBox className="text-[#A1A7C4] text-sm" />
                       <span className="text-[#131523] font-medium">{p.name}</span>
                     </div>
-                   </td>
-                  <td className="py-3 px-4 font-semibold text-[#1E5EFF]">{formatRupiah(p.price)}</td>
+                  </td>
+                  <td className="py-3 px-4">
+                    {/* PAKAI PRICEDISPLAY */}
+                    <PriceDisplay amount={p.price} className="font-semibold text-[#1E5EFF]" />
+                  </td>
                   <td className="py-3 px-4">
                     {editingId === p.id ? (
                       <input 
@@ -166,26 +176,23 @@ export default function StockPage() {
                   </td>
                   <td className="py-3 px-4 text-[#5A607F]">{p.minStock}</td>
                   <td className="py-3 px-4">
-                    {p.stock < p.minStock ? (
-                      <span className="px-2 py-1 rounded-full text-xs bg-[#FDE7EA] text-[#F0142F]">Menipis</span>
-                    ) : (
-                      <span className="px-2 py-1 rounded-full text-xs bg-[#DAF9EC] text-[#06A561]">Aman</span>
-                    )}
+                    {/* PAKAI STOCKBADGE */}
+                    <StockBadge stock={p.stock} minStock={p.minStock} />
                   </td>
                   <td className="py-3 px-4">
                     {editingId === p.id ? (
                       <div className="flex gap-2">
-                        <button onClick={() => handleUpdate(p.id)} className="text-[#06A561] hover:text-green-700 text-sm font-medium">
+                        <Button type="success" onClick={() => handleUpdate(p.id)} size="sm">
                           Simpan
-                        </button>
-                        <button onClick={() => setEditingId(null)} className="text-[#A1A7C4] hover:text-gray-600 text-sm font-medium">
+                        </Button>
+                        <Button type="secondary" onClick={() => setEditingId(null)} size="sm">
                           Batal
-                        </button>
+                        </Button>
                       </div>
                     ) : (
-                      <button onClick={() => { setEditingId(p.id); setNewStock(p.stock.toString()); }} className="text-[#1E5EFF] hover:text-blue-700 transition">
+                      <Button type="outline" onClick={() => { setEditingId(p.id); setNewStock(p.stock.toString()); }}>
                         <FaEdit className="text-lg" />
-                      </button>
+                      </Button>
                     )}
                   </td>
                 </tr>
@@ -194,20 +201,21 @@ export default function StockPage() {
           </table>
         </div>
 
-        {/* Pagination */}
+        {/* Pagination - PAKAI BUTTON */}
         {totalPages > 1 && (
           <div className="flex justify-between items-center p-4 border-t border-[#D7DBEC]">
             <div className="text-sm text-[#7E84A3]">
               Menampilkan {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredProducts.length)} dari {filteredProducts.length} produk
             </div>
             <div className="flex items-center gap-2">
-              <button
+              <Button
+                type="secondary"
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="p-2 rounded-lg border border-[#D7DBEC] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#F5F6FA] text-[#5A607F]"
+                className="p-2"
               >
                 <FaChevronLeft size={14} />
-              </button>
+              </Button>
               {[...Array(Math.min(totalPages, 5))].map((_, idx) => {
                 let pageNum;
                 if (totalPages <= 5) {
@@ -220,26 +228,24 @@ export default function StockPage() {
                   pageNum = currentPage - 2 + idx;
                 }
                 return (
-                  <button
+                  <Button
                     key={idx}
+                    type={currentPage === pageNum ? "primary" : "secondary"}
                     onClick={() => setCurrentPage(pageNum)}
-                    className={`px-3 py-1 rounded-lg transition ${
-                      currentPage === pageNum
-                        ? 'bg-[#1E5EFF] text-white'
-                        : 'text-[#7E84A3] hover:bg-[#F5F6FA]'
-                    }`}
+                    className="px-3 py-1"
                   >
                     {pageNum}
-                  </button>
+                  </Button>
                 );
               })}
-              <button
+              <Button
+                type="secondary"
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="p-2 rounded-lg border border-[#D7DBEC] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#F5F6FA] text-[#5A607F]"
+                className="p-2"
               >
                 <FaChevronRight size={14} />
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -253,10 +259,10 @@ export default function StockPage() {
       </div>
 
       {/* Footer */}
-      <div className="text-center text-xs text-[#A1A7C4] py-4">
+      <div className="text-center text-xs text-[#A1A7C4] py-4 mt-6">
         <p>Jl. Paus No.73, Pekanbaru</p>
         <p>© 2025 Toko Buku Cendekia</p>
       </div>
-    </div>
+    </Container>
   );
 }
