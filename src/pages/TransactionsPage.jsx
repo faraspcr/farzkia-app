@@ -14,6 +14,7 @@ import SearchBar from '../components/SearchBar';
 import Badge from '../components/Badge';
 import PriceDisplay from '../components/PriceDisplay';
 import TransactionBadge from '../components/TransactionBadge';
+import TransactionCard from '../components/TransactionCard';  // ✅ TAMBAHKAN IMPORT
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
@@ -72,7 +73,7 @@ export default function TransactionsPage() {
     return <TransactionBadge status={status} />;
   };
 
-  // Source Badge - TETAP MANUAL (karena bukan komponen yang tersedia)
+  // Source Badge - TETAP MANUAL
   const getSourceBadge = (source) => {
     switch(source) {
       case 'offline':
@@ -90,7 +91,7 @@ export default function TransactionsPage() {
 
   return (
     <Container>
-      {/* Header - PAKAI PAGEHEADER dan BUTTON */}
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <PageHeader 
           title="Riwayat Transaksi" 
@@ -101,7 +102,7 @@ export default function TransactionsPage() {
         </Button>
       </div>
 
-      {/* Filter - TETAP MANUAL (karena tidak ada komponen filter) */}
+      {/* Filter */}
       <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-4 mb-6">
         {/* Row 1: Status Filter */}
         <div className="flex flex-wrap items-center gap-3 mb-3">
@@ -126,7 +127,7 @@ export default function TransactionsPage() {
           </div>
         </div>
 
-        {/* Row 2: Source Filter + Search - PAKAI SEARCHBAR */}
+        {/* Row 2: Source Filter + Search */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#D7DBEC]">
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#7E84A3]">Sumber:</span>
@@ -152,7 +153,6 @@ export default function TransactionsPage() {
             </div>
           </div>
 
-          {/* PAKAI SEARCHBAR */}
           <div className="w-full md:w-80">
             <SearchBar 
               placeholder="Cari nama pelanggan atau ID transaksi..."
@@ -163,43 +163,14 @@ export default function TransactionsPage() {
         </div>
       </div>
 
-      {/* Tabel Data - PAKAI PRICEDISPLAY */}
+      {/* ✅ Daftar Transaksi - PAKAI TRANSACTIONCARD */}
       <div className="grid grid-cols-1 gap-4">
         {paginatedTransactions.map((transaction) => (
-          <div key={transaction.id} className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-4 hover:shadow-md transition">
-            <div className="flex justify-between items-start mb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#F5F6FA] rounded-xl flex items-center justify-center">
-                  <FaShoppingBag className="text-[#1E5EFF] text-lg" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm font-bold text-[#131523]">#{transaction.id}</span>
-                    {getStatusBadge(transaction.status)}
-                  </div>
-                  <p className="text-xs text-[#7E84A3]">{formatShortDate(transaction.orderDate)}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                {/* PAKAI PRICEDISPLAY */}
-                <PriceDisplay amount={transaction.total} className="text-lg font-bold text-[#1E5EFF]" />
-                {getSourceBadge(transaction.source)}
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between pt-3 border-t border-[#D7DBEC]">
-              <div>
-                <p className="text-sm font-medium text-[#131523]">{transaction.customerName}</p>
-                <p className="text-xs text-[#A1A7C4]">{transaction.items?.length || 0} item</p>
-              </div>
-              <Link 
-                to={`/tracking/${transaction.id}`}
-                className="flex items-center gap-2 text-[#1E5EFF] hover:text-blue-700 text-sm font-medium"
-              >
-                <FaEye size={14} /> Lihat Detail
-              </Link>
-            </div>
-          </div>
+          <TransactionCard 
+            key={transaction.id}
+            transaction={transaction} 
+            onViewDetail={() => window.location.href = `/tracking/${transaction.id}`} 
+          />
         ))}
       </div>
 
@@ -214,7 +185,7 @@ export default function TransactionsPage() {
         </div>
       )}
 
-      {/* Pagination - PAKAI BUTTON */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-between items-center p-4 bg-white rounded-xl shadow-sm border border-[#D7DBEC] mt-6">
           <div className="text-sm text-[#7E84A3]">
