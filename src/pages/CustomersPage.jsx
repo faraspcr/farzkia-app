@@ -6,7 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { getCustomers, deleteCustomer, addCustomer, updateCustomer } from '../data/customers';
 import { formatRupiah } from '../data/formatters';
 
-// IMPORT KOMPONEN BARU
+// IMPORT KOMPONEN
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 import Avatar from '../components/Avatar';
@@ -16,6 +16,18 @@ import InputField from '../components/InputField';
 import Container from '../components/Container';
 import PageHeader from '../components/PageHeader';
 import SearchBar from '../components/SearchBar';
+
+// ✅ IMPORT ALERT DIALOG
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState([]);
@@ -27,6 +39,11 @@ export default function CustomersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
+  
+  // ✅ STATE UNTUK ALERT DIALOG
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState(null);
+  
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -79,10 +96,18 @@ export default function CustomersPage() {
     setCurrentPage(1);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Yakin ingin menghapus pelanggan ini?')) {
-      deleteCustomer(id);
+  // ✅ FUNGSI HAPUS DENGAN ALERT DIALOG
+  const handleDeleteClick = (customer) => {
+    setCustomerToDelete(customer);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (customerToDelete) {
+      deleteCustomer(customerToDelete.id);
       loadCustomers();
+      setDeleteDialogOpen(false);
+      setCustomerToDelete(null);
     }
   };
 
@@ -121,9 +146,6 @@ export default function CustomersPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCustomers = filteredCustomers.slice(startIndex, startIndex + itemsPerPage);
 
-  // HAPUS fungsi getAvatarColor dan getInitials karena sudah pakai Avatar component
-
-  // PAKAI BADGE COMPONENT untuk status
   const getStatusBadge = (status) => {
     switch(status) {
       case 'aktif': 
@@ -144,7 +166,6 @@ export default function CustomersPage() {
     }
   };
 
-  // PAKAI BADGE COMPONENT untuk member level
   const getMemberLevelBadge = (level) => {
     switch(level) {
       case 'gold': return <Badge type="gold">Gold</Badge>;
@@ -157,7 +178,6 @@ export default function CustomersPage() {
 
   return (
     <Container>
-      {/* Header - PAKAI PAGEHEADER dan BUTTON */}
       <div className="flex justify-between items-center mb-6">
         <PageHeader title="Pelanggan" description="Kelola data pelanggan toko buku" />
         <Button type="primary" onClick={openAddModal}>
@@ -165,7 +185,6 @@ export default function CustomersPage() {
         </Button>
       </div>
 
-      {/* Filter dan Search - PAKAI SEARCHBAR */}
       <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-4 mb-6">
         <div className="flex flex-wrap gap-4 items-center">
           <select 
@@ -199,7 +218,6 @@ export default function CustomersPage() {
         </div>
       </div>
 
-      {/* Tabel Data */}
       <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -219,7 +237,6 @@ export default function CustomersPage() {
                 <tr key={customer.id} className="border-b border-[#D7DBEC] hover:bg-[#F5F6FA] transition">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
-                      {/* ✅ PAKAI AVATAR COMPONENT */}
                       <Avatar name={customer.name} size="sm" />
                       <Link 
                         to={`/customers/${customer.id}`} 
@@ -228,7 +245,7 @@ export default function CustomersPage() {
                         {customer.name}
                       </Link>
                     </div>
-                   </td>
+                  </td>
                   <td className="py-3 px-4 text-[#5A607F]">{customer.phone}</td>
                   <td className="py-3 px-4 text-[#5A607F]">{getCategoryLabel(customer.category)}</td>
                   <td className="py-3 px-4">{getMemberLevelBadge(customer.memberLevel)}</td>
@@ -254,8 +271,9 @@ export default function CustomersPage() {
                       >
                         <FaEdit size={18} />
                       </button>
+                      {/* ✅ TOMBOL HAPUS PAKAI ALERT DIALOG */}
                       <button 
-                        onClick={() => handleDelete(customer.id)}
+                        onClick={() => handleDeleteClick(customer)}
                         className="text-[#F0142F] hover:text-red-700 transition"
                         title="Hapus"
                       >
@@ -269,7 +287,6 @@ export default function CustomersPage() {
           </table>
         </div>
 
-        {/* Pagination - PAKAI BUTTON */}
         {totalPages > 1 && (
           <div className="flex justify-between items-center p-4 border-t border-[#D7DBEC]">
             <div className="text-sm text-[#7E84A3]">
@@ -319,7 +336,6 @@ export default function CustomersPage() {
         )}
       </div>
 
-      {/* Modal Tambah/Edit Customer - PAKAI MODAL dan INPUT FIELD */}
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
@@ -382,7 +398,25 @@ export default function CustomersPage() {
         </form>
       </Modal>
 
-      {/* Footer */}
+      {/* ✅ ALERT DIALOG KONFIRMASI HAPUS */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Yakin ingin menghapus?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Pelanggan "{customerToDelete?.name}" akan dihapus secara permanen.
+              Data transaksi pelanggan ini juga akan ikut terhapus.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="text-center text-xs text-[#A1A7C4] py-4">
         <p>Jl. Paus No.73, Pekanbaru</p>
         <p>© 2025 Toko Buku Cendekia</p>

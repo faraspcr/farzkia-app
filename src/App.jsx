@@ -22,8 +22,6 @@ const ReportsPage = lazy(() => import('./pages/ReportsPage'));
 const OmnichannelPage = lazy(() => import('./pages/OmnichannelPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
-// ⭐ INI YANG PENTING
-const ComponentsPage = lazy(() => import('./pages/components'));
 
 // Auth Pages
 const Login = lazy(() => import('./pages/auth/Login'));
@@ -47,9 +45,7 @@ function App() {
           <Route path="/tracking/:id" element={<TrackingPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/omnichannel" element={<OmnichannelPage />} />
-          
-          {/* ⭐ ROUTE UNTUK COMPONENTS */}
-         <Route path="/components" element={<ComponentsPage />} />
+    
         </Route>
 
         <Route element={<AuthLayout />}>

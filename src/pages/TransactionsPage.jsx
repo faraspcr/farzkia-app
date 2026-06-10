@@ -6,7 +6,6 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { getTransactions } from '../data/transactions';
 import { formatRupiah, formatShortDate } from '../data/formatters';
 
-// IMPORT KOMPONEN YANG SUDAH ADA
 import Button from '../components/Button';
 import Container from '../components/Container';
 import PageHeader from '../components/PageHeader';
@@ -14,7 +13,22 @@ import SearchBar from '../components/SearchBar';
 import Badge from '../components/Badge';
 import PriceDisplay from '../components/PriceDisplay';
 import TransactionBadge from '../components/TransactionBadge';
-import TransactionCard from '../components/TransactionCard';  // ✅ TAMBAHKAN IMPORT
+import TransactionCard from '../components/TransactionCard';
+
+// ✅ IMPORT TABS
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+// ✅ IMPORT ALERT DIALOG
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
@@ -24,6 +38,10 @@ export default function TransactionsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+
+  // ✅ STATE UNTUK ALERT DIALOG BATAL TRANSAKSI
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [transactionToCancel, setTransactionToCancel] = useState(null);
 
   const itemsPerPage = 8;
 
@@ -64,16 +82,25 @@ export default function TransactionsPage() {
     setCurrentPage(1);
   };
 
+  // ✅ FUNGSI BATAL TRANSAKSI DENGAN ALERT DIALOG
+  const handleCancelClick = (transaction) => {
+    setTransactionToCancel(transaction);
+    setCancelDialogOpen(true);
+  };
+
+  const confirmCancel = () => {
+    if (transactionToCancel) {
+      alert(`Transaksi #${transactionToCancel.id} dibatalkan`);
+      loadTransactions();
+      setCancelDialogOpen(false);
+      setTransactionToCancel(null);
+    }
+  };
+
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedTransactions = filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
 
-  // PAKAI TRANSACTIONBADGE COMPONENT
-  const getStatusBadge = (status) => {
-    return <TransactionBadge status={status} />;
-  };
-
-  // Source Badge - TETAP MANUAL
   const getSourceBadge = (source) => {
     switch(source) {
       case 'offline':
@@ -91,7 +118,6 @@ export default function TransactionsPage() {
 
   return (
     <Container>
-      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <PageHeader 
           title="Riwayat Transaksi" 
@@ -102,32 +128,31 @@ export default function TransactionsPage() {
         </Button>
       </div>
 
-      {/* Filter */}
       <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-4 mb-6">
-        {/* Row 1: Status Filter */}
-        <div className="flex flex-wrap items-center gap-3 mb-3">
-          <span className="text-sm text-[#7E84A3]">Status:</span>
-          <div className="flex flex-wrap gap-2">
-            {['all', 'pesanan_diterima', 'diproses', 'siap_diambil', 'selesai'].map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-3 py-1.5 rounded-lg text-sm transition ${
-                  statusFilter === status 
-                    ? 'bg-[#1E5EFF] text-white' 
-                    : 'bg-[#F5F6FA] text-[#5A607F] hover:bg-[#E6E9F4]'
-                }`}
-              >
-                {status === 'all' ? 'Semua' : 
-                 status === 'pesanan_diterima' ? 'Diterima' :
-                 status === 'diproses' ? 'Diproses' :
-                 status === 'siap_diambil' ? 'Siap Diambil' : 'Selesai'}
-              </button>
-            ))}
-          </div>
+        {/* ✅ FILTER STATUS PAKAI TABS */}
+        <div className="mb-4">
+          <span className="text-sm text-[#7E84A3] block mb-2">Status Transaksi:</span>
+          <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full">
+            <TabsList className="flex flex-wrap h-auto gap-1 bg-[#F5F6FA] p-1 rounded-lg">
+              <TabsTrigger value="all" className="data-[state=active]:bg-[#1E5EFF] data-[state=active]:text-white px-3 py-1.5 rounded-md text-sm">
+                Semua
+              </TabsTrigger>
+              <TabsTrigger value="pesanan_diterima" className="data-[state=active]:bg-[#1E5EFF] data-[state=active]:text-white px-3 py-1.5 rounded-md text-sm">
+                Diterima
+              </TabsTrigger>
+              <TabsTrigger value="diproses" className="data-[state=active]:bg-[#1E5EFF] data-[state=active]:text-white px-3 py-1.5 rounded-md text-sm">
+                Diproses
+              </TabsTrigger>
+              <TabsTrigger value="siap_diambil" className="data-[state=active]:bg-[#1E5EFF] data-[state=active]:text-white px-3 py-1.5 rounded-md text-sm">
+                Siap Diambil
+              </TabsTrigger>
+              <TabsTrigger value="selesai" className="data-[state=active]:bg-[#1E5EFF] data-[state=active]:text-white px-3 py-1.5 rounded-md text-sm">
+                Selesai
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
-        {/* Row 2: Source Filter + Search */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#D7DBEC]">
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#7E84A3]">Sumber:</span>
@@ -163,7 +188,6 @@ export default function TransactionsPage() {
         </div>
       </div>
 
-      {/* ✅ Daftar Transaksi - PAKAI TRANSACTIONCARD */}
       <div className="grid grid-cols-1 gap-4">
         {paginatedTransactions.map((transaction) => (
           <TransactionCard 
@@ -174,7 +198,6 @@ export default function TransactionsPage() {
         ))}
       </div>
 
-      {/* Empty State */}
       {filteredTransactions.length === 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-8 text-center">
           <FaShoppingBag className="text-[#A1A7C4] text-4xl mx-auto mb-3" />
@@ -185,7 +208,6 @@ export default function TransactionsPage() {
         </div>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-between items-center p-4 bg-white rounded-xl shadow-sm border border-[#D7DBEC] mt-6">
           <div className="text-sm text-[#7E84A3]">
@@ -234,7 +256,25 @@ export default function TransactionsPage() {
         </div>
       )}
 
-      {/* Footer */}
+      {/* ALERT DIALOG KONFIRMASI BATAL TRANSAKSI */}
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Batalkan Transaksi?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Transaksi #{transactionToCancel?.id} - {transactionToCancel?.customerName} akan dibatalkan.
+              Aksi ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Kembali</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmCancel} className="bg-red-600 hover:bg-red-700">
+              Ya, Batalkan
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="text-center text-xs text-[#A1A7C4] py-4">
         <p>Jl. Paus No.73, Pekanbaru</p>
         <p>© 2025 Toko Buku Cendekia</p>

@@ -27,7 +27,7 @@ export default function TransactionCard({ transaction, onViewDetail }) {
       <PriceDisplay amount={transaction.amount} className="text-xl font-bold text-gray-800 mb-1" />
       
       <div className="flex justify-between items-center mt-3">
-        <span className="text-xs text-gray-500">{transaction.items} item</span>
+        <span className="text-xs text-gray-500">{transaction.items?.length || 0} item</span>  {/* ← PERBAIKAN DI SINI */}
         <Button type="outline" onClick={() => onViewDetail(transaction)}>
           Lihat Detail
         </Button>

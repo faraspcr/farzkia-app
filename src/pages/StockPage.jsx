@@ -5,7 +5,6 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { getProducts, updateProductStock, getLowStockProducts } from '../data/products';
 import { formatRupiah } from '../data/formatters';
 
-// IMPORT KOMPONEN YANG SUDAH ADA
 import Button from '../components/Button';
 import Container from '../components/Container';
 import PageHeader from '../components/PageHeader';
@@ -14,15 +13,39 @@ import Badge from '../components/Badge';
 import PriceDisplay from '../components/PriceDisplay';
 import StockBadge from '../components/StockBadge';
 
+// ✅ IMPORT ACCORDION
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+// ✅ IMPORT ALERT DIALOG
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 export default function StockPage() {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterCategory, setFilterCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [editingId, setEditingId] = useState(null);
-  const [newStock, setNewStock] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [openItemId, setOpenItemId] = useState(null);
+
+  // ✅ STATE UNTUK ALERT DIALOG EDIT STOK
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState(null);
+  const [tempStock, setTempStock] = useState('');
 
   const itemsPerPage = 10;
 
@@ -57,12 +80,19 @@ export default function StockPage() {
     setCurrentPage(1);
   };
 
-  const handleUpdate = (id) => {
-    if (newStock !== '' && parseInt(newStock) >= 0) {
-      updateProductStock(id, parseInt(newStock));
+  const handleEditClick = (product) => {
+    setProductToEdit(product);
+    setTempStock(product.stock.toString());
+    setEditDialogOpen(true);
+  };
+
+  const confirmEdit = () => {
+    if (productToEdit && tempStock !== '' && parseInt(tempStock) >= 0) {
+      updateProductStock(productToEdit.id, parseInt(tempStock));
       loadProducts();
-      setEditingId(null);
-      setNewStock('');
+      setEditDialogOpen(false);
+      setProductToEdit(null);
+      setTempStock('');
     }
   };
 
@@ -86,13 +116,11 @@ export default function StockPage() {
 
   return (
     <Container>
-      {/* PAKAI PAGEHEADER */}
       <PageHeader 
         title="Manajemen Stok" 
         description="Kelola stok produk toko buku"
       />
 
-      {/* Alert Stok Menipis - PAKAI BADGE */}
       {lowStock.length > 0 && (
         <div className="bg-[#FFF9E1] border border-[#FFE582] rounded-xl p-4 mb-6">
           <div className="flex items-center gap-2 mb-2">
@@ -109,7 +137,6 @@ export default function StockPage() {
         </div>
       )}
 
-      {/* Filter Kategori + Search - PAKAI SEARCHBAR */}
       <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-4 mb-6">
         <div className="flex flex-wrap items-center gap-4">
           <select 
@@ -132,133 +159,145 @@ export default function StockPage() {
         </div>
       </div>
 
-      {/* Tabel Stok */}
-      <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[#D7DBEC] bg-[#F5F6FA]">
-                <th className="text-left py-3 px-4 text-[#7E84A3] font-medium">Produk</th>
-                <th className="text-left py-3 px-4 text-[#7E84A3] font-medium">Harga</th>
-                <th className="text-left py-3 px-4 text-[#7E84A3] font-medium">Stok</th>
-                <th className="text-left py-3 px-4 text-[#7E84A3] font-medium">Min Stok</th>
-                <th className="text-left py-3 px-4 text-[#7E84A3] font-medium">Status</th>
-                <th className="text-left py-3 px-4 text-[#7E84A3] font-medium">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedProducts.map((p) => (
-                <tr key={p.id} className="border-b border-[#D7DBEC] hover:bg-[#F5F6FA] transition">
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <FaBox className="text-[#A1A7C4] text-sm" />
-                      <span className="text-[#131523] font-medium">{p.name}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    {/* PAKAI PRICEDISPLAY */}
-                    <PriceDisplay amount={p.price} className="font-semibold text-[#1E5EFF]" />
-                  </td>
-                  <td className="py-3 px-4">
-                    {editingId === p.id ? (
-                      <input 
-                        type="number" 
-                        value={newStock} 
-                        onChange={(e) => setNewStock(e.target.value)} 
-                        className="w-24 px-2 py-1 border border-[#D7DBEC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1E5EFF] text-[#131523]"
-                        autoFocus 
-                      />
-                    ) : (
-                      <span className={p.stock < p.minStock ? 'text-[#F0142F] font-bold' : 'text-[#131523]'}>
-                        {p.stock}
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 text-[#5A607F]">{p.minStock}</td>
-                  <td className="py-3 px-4">
-                    {/* PAKAI STOCKBADGE */}
-                    <StockBadge stock={p.stock} minStock={p.minStock} />
-                  </td>
-                  <td className="py-3 px-4">
-                    {editingId === p.id ? (
-                      <div className="flex gap-2">
-                        <Button type="success" onClick={() => handleUpdate(p.id)} size="sm">
-                          Simpan
-                        </Button>
-                        <Button type="secondary" onClick={() => setEditingId(null)} size="sm">
-                          Batal
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button type="outline" onClick={() => { setEditingId(p.id); setNewStock(p.stock.toString()); }}>
-                        <FaEdit className="text-lg" />
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination - PAKAI BUTTON */}
-        {totalPages > 1 && (
-          <div className="flex justify-between items-center p-4 border-t border-[#D7DBEC]">
-            <div className="text-sm text-[#7E84A3]">
-              Menampilkan {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredProducts.length)} dari {filteredProducts.length} produk
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                type="secondary"
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="p-2"
-              >
-                <FaChevronLeft size={14} />
-              </Button>
-              {[...Array(Math.min(totalPages, 5))].map((_, idx) => {
-                let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = idx + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = idx + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + idx;
-                } else {
-                  pageNum = currentPage - 2 + idx;
-                }
-                return (
-                  <Button
-                    key={idx}
-                    type={currentPage === pageNum ? "primary" : "secondary"}
-                    onClick={() => setCurrentPage(pageNum)}
-                    className="px-3 py-1"
-                  >
-                    {pageNum}
+      {/* ✅ ACCORDION LIST PRODUK */}
+      <div className="space-y-3">
+        {paginatedProducts.map((product) => (
+          <Accordion 
+            key={product.id} 
+            type="single" 
+            collapsible 
+            className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] overflow-hidden"
+            value={openItemId}
+            onValueChange={setOpenItemId}
+          >
+            <AccordionItem value={product.id} className="border-0">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-[#F5F6FA]">
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-3">
+                    <FaBox className="text-[#A1A7C4] text-sm" />
+                    <span className="text-[#131523] font-medium">{product.name}</span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm">
+                    <PriceDisplay amount={product.price} className="font-semibold text-[#1E5EFF]" />
+                    <span className={product.stock < product.minStock ? 'text-[#F0142F] font-bold' : 'text-[#131523]'}>
+                      Stok: {product.stock}
+                    </span>
+                    <StockBadge stock={product.stock} minStock={product.minStock} />
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 py-4 bg-[#F5F6FA] border-t border-[#D7DBEC]">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-xs text-[#7E84A3]">Harga</p>
+                    <PriceDisplay amount={product.price} className="font-semibold text-[#131523]" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#7E84A3]">Stok Saat Ini</p>
+                    <p className={`font-semibold ${product.stock < product.minStock ? 'text-[#F0142F]' : 'text-[#131523]'}`}>
+                      {product.stock}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#7E84A3]">Minimal Stok</p>
+                    <p className="font-semibold text-[#131523]">{product.minStock}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#7E84A3]">Status</p>
+                    <StockBadge stock={product.stock} minStock={product.minStock} />
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <Button type="outline" onClick={() => handleEditClick(product)}>
+                    <FaEdit className="mr-2" /> Ubah Stok
                   </Button>
-                );
-              })}
-              <Button
-                type="secondary"
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="p-2"
-              >
-                <FaChevronRight size={14} />
-              </Button>
-            </div>
-          </div>
-        )}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        ))}
 
-        {/* Empty State */}
         {filteredProducts.length === 0 && (
-          <div className="text-center py-8">
+          <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-8 text-center">
             <p className="text-[#7E84A3]">Tidak ada produk yang ditemukan</p>
           </div>
         )}
       </div>
 
-      {/* Footer */}
+      {totalPages > 1 && (
+        <div className="flex justify-between items-center p-4 bg-white rounded-xl shadow-sm border border-[#D7DBEC] mt-6">
+          <div className="text-sm text-[#7E84A3]">
+            Menampilkan {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredProducts.length)} dari {filteredProducts.length} produk
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="secondary"
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="p-2"
+            >
+              <FaChevronLeft size={14} />
+            </Button>
+            {[...Array(Math.min(totalPages, 5))].map((_, idx) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = idx + 1;
+              } else if (currentPage <= 3) {
+                pageNum = idx + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + idx;
+              } else {
+                pageNum = currentPage - 2 + idx;
+              }
+              return (
+                <Button
+                  key={idx}
+                  type={currentPage === pageNum ? "primary" : "secondary"}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className="px-3 py-1"
+                >
+                  {pageNum}
+                </Button>
+              );
+            })}
+            <Button
+              type="secondary"
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="p-2"
+            >
+              <FaChevronRight size={14} />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ALERT DIALOG */}
+      <AlertDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ubah Stok Produk</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ubah stok produk "{productToEdit?.name}" dari {productToEdit?.stock} menjadi:
+              <input 
+                type="number" 
+                value={tempStock} 
+                onChange={(e) => setTempStock(e.target.value)} 
+                className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E5EFF]"
+                min="0"
+                autoFocus
+              />
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmEdit} className="bg-[#1E5EFF] hover:bg-blue-700">
+              Simpan Perubahan
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="text-center text-xs text-[#A1A7C4] py-4 mt-6">
         <p>Jl. Paus No.73, Pekanbaru</p>
         <p>© 2025 Toko Buku Cendekia</p>
