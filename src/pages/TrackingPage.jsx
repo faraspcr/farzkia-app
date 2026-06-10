@@ -73,7 +73,7 @@ export default function TrackingPage() {
           </div>
         </div>
         
-        {/* Kolom Kanan - Informasi - PAKAI DIV BIASA */}
+        {/* Kolom Kanan - Informasi  */}
         <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
           <h3 className="font-bold mb-4 text-gray-800">Informasi</h3>
           <div className="space-y-3 text-sm">
