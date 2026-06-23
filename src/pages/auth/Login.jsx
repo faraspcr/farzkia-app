@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 
 import {
   FaEnvelope,
@@ -10,6 +11,18 @@ import {
 
 import { BsFillExclamationDiamondFill } from "react-icons/bs";
 import { ImSpinner2 } from "react-icons/im";
+
+// ============================================
+// KONFIGURASI SUPABASE
+// ============================================
+const API_URL = "https://ajzhvqiottyeodhhtyqb.supabase.co/rest/v1/users"
+const API_KEY = "sb_publishable_g_qv9oZdohhB98Z33_AWuw_9cT4MS-E"
+
+const headers = {
+  apikey: API_KEY,
+  Authorization: `Bearer ${API_KEY}`,
+  "Content-Type": "application/json",
+}
 
 export default function Login() {
   // NAVIGATE
@@ -22,8 +35,8 @@ export default function Login() {
 
   // FORM DATA
   const [dataForm, setDataForm] = useState({
-    username: "emilys",
-    password: "emilyspass",
+    email: "",
+    password: "",
   });
 
   // HANDLE INPUT
@@ -41,41 +54,55 @@ export default function Login() {
     e.preventDefault();
 
     // VALIDASI
-    if (!dataForm.username || !dataForm.password) {
-      setError("Username dan password wajib diisi");
+    if (!dataForm.email || !dataForm.password) {
+      setError("Email dan password wajib diisi");
       return;
     }
 
     setLoading(true);
     setError("");
 
-    // SIMULASI LOGIN
-    setTimeout(() => {
-
-      // LOGIN BERHASIL
-      if (
-        dataForm.username === "emilys" &&
-        dataForm.password === "emilyspass"
-      ) {
-
-        // SIMPAN TOKEN
-        localStorage.setItem(
-          "token",
-          "dummy-token-123"
-        );
-
-        // REDIRECT
+    try {
+      // Cari user dengan email dan password yang cocok di Supabase
+      const response = await axios.get(
+        `${API_URL}?email=ilike.${dataForm.email}&password=eq.${dataForm.password}`,
+        { headers }
+      );
+      
+      if (response.data.length > 0) {
+        // Login berhasil
+        const userData = response.data[0];
+        localStorage.setItem("user", JSON.stringify(userData));
         navigate("/");
-
       } else {
-
-        // LOGIN GAGAL
-        setError("Username atau password salah");
+        // Cek apakah email ada (tanpa password)
+        try {
+          const emailCheck = await axios.get(
+            `${API_URL}?email=ilike.${dataForm.email}`,
+            { headers }
+          );
+          
+          if (emailCheck.data.length > 0) {
+            setError("❌ Password salah!");
+          } else {
+            setError("❌ Email tidak terdaftar!");
+          }
+        } catch (emailErr) {
+          setError("❌ Email atau password salah");
+        }
       }
-
+    } catch (err) {
+      console.error("Login error:", err);
+      if (err.response) {
+        setError(err.response.data.message || "Email atau password salah");
+      } else if (err.request) {
+        setError("Tidak dapat terhubung ke server. Cek koneksi internet Anda.");
+      } else {
+        setError(err.message || "Terjadi kesalahan");
+      }
+    } finally {
       setLoading(false);
-
-    }, 1000);
+    }
   };
 
   // ERROR INFO
@@ -112,22 +139,22 @@ export default function Login() {
       {/* FORM */}
       <form onSubmit={handleSubmit}>
 
-        {/* USERNAME */}
+        {/* EMAIL */}
         <div className="mb-5">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Username
+            Email
           </label>
 
           <div className="relative">
             <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 
             <input
-              type="text"
-              name="username"
-              value={dataForm.username}
+              type="email"
+              name="email"
+              value={dataForm.email}
               onChange={handleChange}
               className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Masukkan username"
+              placeholder="Masukkan email"
             />
           </div>
         </div>
@@ -171,11 +198,10 @@ export default function Login() {
           </Link>
         </div>
 
-     
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
+          className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           {loading ? "Memproses..." : "Masuk"}
         </button>

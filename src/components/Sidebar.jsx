@@ -9,7 +9,8 @@ import {
   FaChartPie,
   FaStar,
   FaFileAlt,
-  FaStore
+  FaStore,
+  FaUserCog
   
 } from 'react-icons/fa';
 
@@ -26,7 +27,29 @@ const menuItems = [
   { path: '/omnichannel', name: 'Omnichannel', icon: FaStore },
 ];
 
+// Menu khusus admin
+const adminMenuItems = [
+  { path: '/users', name: 'Users', icon: FaUserCog },
+];
+
+
 export default function Sidebar() {
+  // Ambil data user dari localStorage
+  const userData = localStorage.getItem("user");
+  let isAdmin = false;
+  
+  if (userData) {
+    try {
+      const user = JSON.parse(userData);
+      isAdmin = user.role === "admin";
+    } catch (e) {
+      console.error("Error parsing user data:", e);
+    }
+  }
+
+  // Gabungkan menu items + menu admin jika isAdmin true
+  const allMenuItems = isAdmin ? [...menuItems, ...adminMenuItems] : menuItems;
+
   return (
     <aside
       className="w-64 shadow-lg h-screen sticky top-0 flex flex-col"
@@ -75,6 +98,7 @@ export default function Sidebar() {
       <nav className="flex-1 py-4">
         <div className="px-3">
 
+          {/* Menu Utama */}
           {menuItems.map((item) => (
             <NavLink
               key={item.path}
@@ -96,6 +120,42 @@ export default function Sidebar() {
 
             </NavLink>
           ))}
+
+          {/* Menu Admin (hanya untuk admin) */}
+          {isAdmin && (
+            <>
+              {/* Separator */}
+              <div className="my-3 border-t border-gray-200"></div>
+              
+              {/* Label Admin */}
+              <div className="px-3 py-1">
+                <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                  Admin
+                </span>
+              </div>
+
+              {adminMenuItems.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 ${
+                      isActive
+                        ? 'bg-[#1e5eff] text-white font-medium shadow-md'
+                        : 'text-gray-500 hover:bg-white hover:text-gray-700'
+                    }`
+                  }
+                >
+                  <item.icon className="w-4 h-4" />
+
+                  <span className="text-sm font-medium">
+                    {item.name}
+                  </span>
+
+                </NavLink>
+              ))}
+            </>
+          )}
 
         </div>
       </nav>

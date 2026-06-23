@@ -11,7 +11,7 @@ import Container from '../components/Container';
 import PageHeader from '../components/PageHeader';
 import SectionTitle from '../components/SectionTitle';
 
-// ✅ IMPORT TABS
+// IMPORT TABS
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function SegmentationPage() {

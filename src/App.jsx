@@ -22,6 +22,8 @@ const ReportsPage = lazy(() => import('./pages/ReportsPage'));
 const OmnichannelPage = lazy(() => import('./pages/OmnichannelPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
+// [TAMBAHKAN] Import UsersPage
+const UsersPage = lazy(() => import('./pages/UsersPage'));
 
 // Auth Pages
 const Login = lazy(() => import('./pages/auth/Login'));
@@ -45,7 +47,9 @@ function App() {
           <Route path="/tracking/:id" element={<TrackingPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/omnichannel" element={<OmnichannelPage />} />
-    
+          
+          {/* [TAMBAHKAN] Route untuk UsersPage */}
+          <Route path="/users" element={<UsersPage />} />
         </Route>
 
         <Route element={<AuthLayout />}>
@@ -54,7 +58,7 @@ function App() {
           <Route path="/forgot" element={<Forgot />} />
         </Route>
 
-        {/* <Route path="*" element={<NotFound />} /> */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
   );

@@ -1,5 +1,5 @@
 // src/pages/StockPage.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FaEdit, FaExclamationTriangle, FaChevronLeft, FaChevronRight, FaBox } from 'react-icons/fa';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { getProducts, updateProductStock, getLowStockProducts } from '../data/products';
@@ -13,7 +13,7 @@ import Badge from '../components/Badge';
 import PriceDisplay from '../components/PriceDisplay';
 import StockBadge from '../components/StockBadge';
 
-// ✅ IMPORT ACCORDION
+// IMPORT ACCORDION
 import {
   Accordion,
   AccordionContent,
@@ -21,7 +21,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-// ✅ IMPORT ALERT DIALOG
+// IMPORT ALERT DIALOG
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,16 +42,63 @@ export default function StockPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [openItemId, setOpenItemId] = useState(null);
 
-  // ✅ STATE UNTUK ALERT DIALOG EDIT STOK
+  // STATE UNTUK ALERT DIALOG EDIT STOK
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState(null);
   const [tempStock, setTempStock] = useState('');
+
+  // ✅ USEREF UNTUK AUTO-FOCUS
+  const searchRef = useRef(null);
+  const searchContainerRef = useRef(null);
+  const inputRef = useRef(null); // Untuk input di AlertDialog
 
   const itemsPerPage = 10;
 
   useEffect(() => {
     loadProducts();
   }, []);
+
+  // ✅ AUTO-FOCUS KE SEARCH BAR
+  useEffect(() => {
+    const focusSearch = () => {
+      if (searchRef.current) {
+        searchRef.current.focus();
+        return true;
+      }
+      if (searchContainerRef.current) {
+        const input = searchContainerRef.current.querySelector('input');
+        if (input) {
+          input.focus();
+          return true;
+        }
+      }
+      return false;
+    };
+
+    const timer = setTimeout(focusSearch, 150);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // ✅ AUTO-FOCUS ULANG SETELAH LOADING SELESAI
+  useEffect(() => {
+    if (!loading) {
+      setTimeout(() => {
+        if (searchRef.current) {
+          searchRef.current.focus();
+        }
+      }, 100);
+    }
+  }, [loading]);
+
+  // ✅ AUTO-FOCUS KE INPUT ALERT DIALOG
+  useEffect(() => {
+    if (editDialogOpen && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current.focus();
+        inputRef.current.select(); // Select semua teks
+      }, 100);
+    }
+  }, [editDialogOpen]);
 
   useEffect(() => {
     filterProducts();
@@ -95,6 +142,29 @@ export default function StockPage() {
       setTempStock('');
     }
   };
+
+  // ✅ SHORTCUT KEYBOARD
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ctrl+F atau Cmd+F untuk fokus ke search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        if (searchRef.current) {
+          searchRef.current.focus();
+          searchRef.current.select();
+        }
+      }
+      
+      // Escape untuk clear search
+      if (e.key === 'Escape' && searchRef.current === document.activeElement) {
+        setSearchTerm('');
+        searchRef.current.blur();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const lowStock = getLowStockProducts();
 
@@ -149,17 +219,26 @@ export default function StockPage() {
             ))}
           </select>
 
-          <div className="flex-1">
+          {/* ✅ SEARCHBAR DENGAN REF UNTUK AUTO-FOCUS */}
+          <div className="flex-1 min-w-[200px]" ref={searchContainerRef}>
             <SearchBar 
-              placeholder="Cari nama produk..."
+              placeholder="Cari nama produk... (Ctrl+F)"
               value={searchTerm}
               onChange={setSearchTerm}
+              ref={searchRef}
             />
           </div>
+
+          {/* INDIKATOR JUMLAH HASIL */}
+          {searchTerm && (
+            <div className="text-sm text-[#7E84A3] whitespace-nowrap">
+              Ditemukan: {filteredProducts.length} produk
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ✅ ACCORDION LIST PRODUK */}
+      {/* ACCORDION LIST PRODUK */}
       <div className="space-y-3">
         {paginatedProducts.map((product) => (
           <Accordion 
@@ -272,7 +351,7 @@ export default function StockPage() {
         </div>
       )}
 
-      {/* ALERT DIALOG */}
+      {/* ALERT DIALOG DENGAN AUTO-FOCUS PADA INPUT */}
       <AlertDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -280,13 +359,20 @@ export default function StockPage() {
             <AlertDialogDescription>
               Ubah stok produk "{productToEdit?.name}" dari {productToEdit?.stock} menjadi:
               <input 
+                ref={inputRef} // ✅ REF UNTUK AUTO-FOCUS
                 type="number" 
                 value={tempStock} 
                 onChange={(e) => setTempStock(e.target.value)} 
                 className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E5EFF]"
                 min="0"
-                autoFocus
+                placeholder="Masukkan jumlah stok baru"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    confirmEdit();
+                  }
+                }}
               />
+              <p className="text-xs text-gray-400 mt-1">Tekan Enter untuk menyimpan</p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
