@@ -153,6 +153,10 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(239,68,68,0.16),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(59,130,246,0.16),_transparent_30%),linear-gradient(135deg,_#fefefe_0%,_#f7faff_45%,_#fef8f8_100%)] text-gray-800">
       <style>{`
+        html {
+          scroll-behavior: smooth;
+        }
+
         @keyframes fadeInUp {
           from {
             opacity: 0;
@@ -172,12 +176,25 @@ export default function LandingPage() {
           opacity: 0;
           transform: translateY(24px);
           transition: opacity 0.8s ease, transform 0.8s ease;
+          will-change: transform, opacity;
         }
 
         .reveal-on-scroll.is-visible {
           opacity: 1;
           transform: translateY(0);
           animation: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          html {
+            scroll-behavior: auto;
+          }
+
+          .animate-fade-in-up,
+          .reveal-on-scroll {
+            animation: none !important;
+            transition: none !important;
+          }
         }
       `}</style>
 
@@ -504,6 +521,58 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        <section id="kontak" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+          <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-gray-200 bg-gradient-to-br from-white via-blue-50/60 to-red-50/60 p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.25)] sm:p-8 lg:p-10">
+            <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-600">Kontak</p>
+                <h3 className="mt-2 text-3xl font-black text-gray-900">Hubungi kami untuk kebutuhan buku, alat tulis, dan promo terbaru</h3>
+                <p className="mt-4 max-w-2xl text-base leading-8 text-gray-600">
+                  Kami siap membantu melalui WhatsApp, telepon, atau datang langsung ke toko. Semua informasi kontak kami disajikan agar pelanggan dapat terhubung dengan cepat.
+                </p>
+              </div>
+
+              <div className="rounded-[24px] border border-gray-200 bg-white/90 p-6 shadow-sm">
+                <div className="space-y-4 text-sm text-gray-700">
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-lg text-blue-700">📱</span>
+                    <div>
+                      <p className="font-semibold text-gray-900">WhatsApp</p>
+                      <a href="https://wa.me/6281234567890" target="_blank" rel="noreferrer" className="mt-1 inline-block text-blue-600 hover:text-blue-700">
+                        0812-3456-7890
+                      </a>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-lg text-red-600">📍</span>
+                    <div>
+                      <p className="font-semibold text-gray-900">Alamat</p>
+                      <p className="mt-1 leading-7">Jl. Paus No.73, Kelurahan Tangkerang Tengah, Pekanbaru, Riau</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-amber-50 text-lg text-amber-600">🕒</span>
+                    <div>
+                      <p className="font-semibold text-gray-900">Jam Operasional</p>
+                      <p className="mt-1 leading-7">Senin – Sabtu: 08.00 – 20.00</p>
+                      <p className="leading-7">Minggu: 09.00 – 17.00</p>
+                    </div>
+                  </div>
+                </div>
+
+                <a
+                  href="https://wa.me/6281234567890"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-6 inline-flex items-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 px-5 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                  Hubungi via WhatsApp
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       <footer className="border-t border-gray-200 bg-white/80">
@@ -519,6 +588,23 @@ export default function LandingPage() {
               </div>
             </div>
             <p className="mt-3 leading-7">Toko buku dan alat tulis yang hadir untuk memudahkan kebutuhan belajar, kerja, dan aktivitas harian.</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <a href="#" aria-label="Instagram" className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:-translate-y-0.5 hover:border-blue-400 hover:text-blue-600">
+                <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
+                  <path d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm0 2a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H7Zm5 3.5A4.5 4.5 0 1 1 7.5 13 4.5 4.5 0 0 1 12 8.5Zm0 2A2.5 2.5 0 1 0 14.5 13 2.5 2.5 0 0 0 12 10.5Zm5.25-3.25a1 1 0 1 1-1 1 1 1 0 0 1 1-1Z" />
+                </svg>
+              </a>
+              <a href="#" aria-label="Facebook" className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:-translate-y-0.5 hover:border-blue-400 hover:text-blue-600">
+                <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
+                  <path d="M13 22v-8h2.7l.4-3H13V4.6c0-.9.2-1.5 1.5-1.5H16V.1c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 4v2.2H7.5v3h2.4v8h3.1Z" />
+                </svg>
+              </a>
+              <a href="#" aria-label="TikTok" className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:-translate-y-0.5 hover:border-blue-400 hover:text-blue-600">
+                <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
+                  <path d="M14.5 3h2.1a4.8 4.8 0 0 0 4.8 4.8V10a6.6 6.6 0 0 1-4.8-1.7v6.9a5.6 5.6 0 1 1-5.6-5.6c.3 0 .5 0 .8.1v2.7a3 3 0 1 0 1.8 2.8V3Z" />
+                </svg>
+              </a>
+            </div>
           </div>
           <div>
             <h4 className="text-base font-bold text-gray-900">Alamat</h4>
