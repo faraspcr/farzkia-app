@@ -1,7 +1,15 @@
-import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+﻿import { useEffect, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { getCustomerStats } from '../data/customers';
+import { getFeedbackStats } from '../data/feedbacks';
+import { getTransactionStats } from '../data/transactions';
 
-const navItems = ['Beranda', 'Produk', 'Loyalitas', 'Promo'];
+const navItems = [
+  { label: 'Beranda', target: 'beranda' },
+  { label: 'Produk', target: 'produk' },
+  { label: 'Loyalitas', target: 'loyalitas' },
+  { label: 'Promo', target: 'promo' },
+];
 
 const featuredProducts = [
   {
@@ -38,21 +46,21 @@ const loyaltyTiers = [
   {
     name: 'Reguler',
     points: '0–99 poin',
-    perks: ['Diskon rutin mingguan', 'Akses promo member', 'Notifikasi produk terbaru'],
+    perks: ['Poin standar', 'Akses promo member', 'Notifikasi produk terbaru'],
     accent: 'from-slate-100 to-slate-200',
     text: 'text-slate-700',
   },
   {
     name: 'Silver',
     points: '100–299 poin',
-    perks: ['Bonus cashback 3%', 'Prioritas stok favorit', 'Undangan event eksklusif'],
+    perks: ['Diskon 5%', 'Poin 1.5x', 'Prioritas stok favorit'],
     accent: 'from-slate-200 to-blue-100',
     text: 'text-blue-700',
   },
   {
     name: 'Gold',
     points: '300+ poin',
-    perks: ['Diskon khusus 10%', 'Pre-order prioritas', 'Hadiah ulang tahun member'],
+    perks: ['Diskon 10%', 'Poin 2x', 'Pre-order prioritas'],
     accent: 'from-amber-100 to-orange-200',
     text: 'text-amber-700',
   },
@@ -61,13 +69,13 @@ const loyaltyTiers = [
 const promos = [
   {
     title: 'Promo Awal Tahun Ajaran Baru',
-    description: 'Diskon khusus buku paket, alat tulis, dan perlengkapan sekolah.',
-    badge: 'Diskon 25%',
+    description: 'Diskon 10% untuk buku paket dan alat tulis yang dibutuhkan sekolah.',
+    badge: 'Diskon 10%',
   },
   {
     title: 'Ramadhan Berkah',
-    description: 'Program bundling hadiah dan promo khusus untuk pelanggan setia.',
-    badge: 'Bundle hemat',
+    description: "Diskon 15% untuk Al-Qur'an, kitab Islam, dan kebutuhan ibadah.",
+    badge: 'Diskon 15%',
   },
 ];
 
@@ -75,17 +83,17 @@ const testimonials = [
   {
     name: 'Aisyah Putri',
     role: 'Orang Tua Murid',
-    quote: 'Sangat nyaman belanja di Cendekia, stok selalu terjamin dan promo-nya selalu relevan.',
+    quote: 'Best bookshop di Pekanbaru! Pelayanan WhatsApp sangat responsif.',
   },
   {
     name: 'Rama Wijaya',
     role: 'Mahasiswa',
-    quote: 'Paket produk lengkap dan pelayanan terasa personal. Saya jadi lebih sering kembali.',
+    quote: 'Koleksi kitab lengkap dan pelayanan terasa personal.',
   },
   {
     name: 'Dewi Lestari',
-    role: 'Pengusaha Kecil',
-    quote: 'Saya suka sistem loyalitasnya, terasa jelas dan memberi manfaat nyata untuk pelanggan.',
+    role: 'Pelanggan Loyal',
+    quote: 'Produk berkualitas dan sistem loyalitas terasa jelas dan bermanfaat.',
   },
 ];
 
@@ -108,6 +116,11 @@ const whyChoose = [
 ];
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+  const customerStats = useMemo(() => getCustomerStats(), []);
+  const feedbackStats = useMemo(() => getFeedbackStats(), []);
+  const transactionStats = useMemo(() => getTransactionStats(), []);
+
   useEffect(() => {
     const elements = document.querySelectorAll('.reveal-on-scroll');
     const observer = new IntersectionObserver(
@@ -125,6 +138,17 @@ export default function LandingPage() {
 
     return () => observer.disconnect();
   }, []);
+
+  const scrollToSection = (targetId) => {
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleQuickAction = (path) => {
+    navigate(path);
+  };
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(239,68,68,0.16),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(59,130,246,0.16),_transparent_30%),linear-gradient(135deg,_#fefefe_0%,_#f7faff_45%,_#fef8f8_100%)] text-gray-800">
@@ -158,9 +182,13 @@ export default function LandingPage() {
       `}</style>
 
       <header className="sticky top-0 z-50 border-b border-white/70 bg-white/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
           <div className="animate-fade-in-up">
-            <a href="#beranda" className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => scrollToSection('beranda')}
+              className="flex items-center gap-3 text-left"
+            >
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-blue-600 text-lg font-black text-white shadow-lg shadow-blue-200">
                 C
               </div>
@@ -168,84 +196,112 @@ export default function LandingPage() {
                 <h1 className="text-lg font-black tracking-tight text-blue-700">Cendekia</h1>
                 <p className="text-xs text-gray-500">Toko Buku & Alat Tulis</p>
               </div>
-            </a>
+            </button>
           </div>
 
-          <nav className="hidden items-center gap-8 md:flex">
+          <nav className="hidden items-center gap-6 md:flex">
             {navItems.map((item, index) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => scrollToSection(item.target)}
                 className="animate-fade-in-up text-sm font-semibold text-gray-600 transition duration-300 hover:text-blue-600"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                {item}
-              </a>
+                {item.label}
+              </button>
             ))}
           </nav>
 
-          <Link
-            to="/login"
-            className="animate-fade-in-up rounded-full border border-blue-600 px-4 py-2 text-sm font-semibold text-blue-600 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white hover:shadow-lg"
-          >
-            Masuk
-          </Link>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              to="/register"
+              className="animate-fade-in-up hidden rounded-full border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-700 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-50 sm:inline-flex"
+            >
+              Daftar
+            </Link>
+            <Link
+              to="/login"
+              className="animate-fade-in-up rounded-full border border-blue-600 px-4 py-2 text-sm font-semibold text-blue-600 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white hover:shadow-lg"
+            >
+              Masuk
+            </Link>
+          </div>
+
+          <nav className="flex w-full items-center justify-center gap-2 border-t border-gray-100 pt-3 md:hidden">
+            {navItems.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => scrollToSection(item.target)}
+                className="rounded-full px-3 py-1.5 text-sm font-semibold text-gray-600 transition hover:bg-blue-50 hover:text-blue-600"
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
         </div>
       </header>
 
       <main id="beranda">
-        <section className="relative overflow-hidden px-6 py-20 lg:px-8 lg:py-28">
+        <section className="relative overflow-hidden px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(239,68,68,0.16),transparent_24%),radial-gradient(circle_at_80%_20%,rgba(59,130,246,0.16),transparent_24%)]" />
-          <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="animate-fade-in-up reveal-on-scroll">
+          <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
+            <div className="animate-fade-in-up reveal-on-scroll text-center lg:text-left">
               <div className="mb-5 inline-flex items-center rounded-full border border-red-100 bg-white/80 px-4 py-2 text-sm font-semibold text-red-600 shadow-sm backdrop-blur">
                 CRM untuk toko buku modern
               </div>
-              <h2 className="max-w-2xl text-4xl font-black leading-tight text-gray-900 sm:text-5xl lg:text-6xl">
+              <h2 className="mx-auto max-w-2xl text-3xl font-black leading-tight text-gray-900 sm:text-4xl lg:mx-0 lg:text-6xl">
                 Solusi cerdas untuk toko buku yang ingin tumbuh lebih cepat.
               </h2>
-              <p className="mt-6 max-w-xl text-lg leading-8 text-gray-600">
+              <p className="mx-auto mt-5 max-w-xl text-base leading-8 text-gray-600 sm:text-lg lg:mx-0">
                 Cendekia membantu Anda mengelola pelanggan, stok, loyalitas, dan promo dengan pengalaman yang lebih modern, cepat, dan terorganisir.
               </p>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Link
-                  to="/login"
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
+                <button
+                  type="button"
+                  onClick={() => handleQuickAction('/login')}
                   className="rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
                 >
                   Belanja Sekarang
-                </Link>
-                <a
-                  href="#produk"
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollToSection('produk')}
                   className="rounded-full border border-gray-300 bg-white/80 px-6 py-3 text-sm font-semibold text-gray-700 transition duration-300 hover:-translate-y-1 hover:border-blue-600 hover:text-blue-600 hover:shadow-md"
                 >
                   Lihat Produk
-                </a>
+                </button>
               </div>
 
-              <div className="mt-10 flex flex-wrap gap-4">
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 shadow-sm">
-                  <p className="text-xl font-bold text-blue-700">500+</p>
-                  <p className="text-sm text-gray-500">Pelanggan loyal</p>
+                  <p className="text-xl font-bold text-blue-700">{customerStats.total.toLocaleString()}+</p>
+                  <p className="text-sm text-gray-500">Pelanggan terdaftar</p>
                 </div>
                 <div className="rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 shadow-sm">
-                  <p className="text-xl font-bold text-red-500">98%</p>
+                  <p className="text-xl font-bold text-red-500">{feedbackStats.averageRating}/5</p>
                   <p className="text-sm text-gray-500">Kepuasan pelanggan</p>
+                </div>
+                <div className="rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 shadow-sm">
+                  <p className="text-xl font-bold text-emerald-600">{transactionStats.thisMonthCount}</p>
+                  <p className="text-sm text-gray-500">Pesanan bulan ini</p>
                 </div>
               </div>
             </div>
 
-            <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_30px_70px_-24px_rgba(15,23,42,0.25)] backdrop-blur-xl">
+            <div className="animate-fade-in-up reveal-on-scroll rounded-[28px] border border-white/70 bg-white/85 p-5 shadow-[0_30px_70px_-24px_rgba(15,23,42,0.25)] backdrop-blur-xl sm:p-8">
               <div className="rounded-[24px] bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800 p-6 text-white shadow-lg">
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-100">
                   Promo minggu ini
                 </p>
-                <h3 className="mt-3 text-2xl font-bold">Promo Awal Tahun Ajaran Baru</h3>
+                <h3 className="mt-3 text-2xl font-bold">{promos[0].title}</h3>
                 <p className="mt-3 text-sm leading-7 text-blue-50">
-                  Dapatkan diskon spesial untuk alat tulis, buku paket, dan kebutuhan sekolah.
+                  {promos[0].description}
                 </p>
-                <div className="mt-6 flex items-center gap-3">
+                <div className="mt-6 flex flex-wrap items-center gap-3">
                   <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-semibold">
-                    Diskon hingga 25%
+                    {promos[0].badge}
                   </span>
                   <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-semibold">
                     Gratis packing
@@ -266,7 +322,8 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-        <section id="produk" className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
+
+        <section id="produk" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
           <div className="animate-fade-in-up reveal-on-scroll">
             <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
@@ -302,8 +359,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="loyalitas" className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
-          <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-gray-200 bg-white/85 p-8 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.25)] lg:p-10">
+        <section id="loyalitas" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+          <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-gray-200 bg-white/85 p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.25)] sm:p-8 lg:p-10">
             <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-600">Program loyalitas</p>
@@ -321,7 +378,7 @@ export default function LandingPage() {
                   className={`rounded-[24px] border border-gray-200 bg-gradient-to-br ${tier.accent} p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg`}
                   style={{ animationDelay: `${index * 120}ms` }}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-3">
                     <h4 className="text-xl font-bold text-gray-900">{tier.name}</h4>
                     <span className={`rounded-full bg-white/70 px-3 py-1 text-xs font-semibold ${tier.text}`}>
                       {tier.points}
@@ -341,7 +398,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="promo" className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
+        <section id="promo" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
           <div className="animate-fade-in-up reveal-on-scroll">
             <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
@@ -373,8 +430,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
-          <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-gray-200 bg-gradient-to-br from-blue-600 to-indigo-700 p-8 text-white shadow-[0_24px_50px_-22px_rgba(37,99,235,0.45)] lg:p-10">
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+          <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-gray-200 bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-white shadow-[0_24px_50px_-22px_rgba(37,99,235,0.45)] sm:p-8 lg:p-10">
             <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-100">Testimoni pelanggan</p>
@@ -408,8 +465,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
-          <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-gray-200 bg-white/90 p-8 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.25)] lg:p-10">
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+          <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-gray-200 bg-white/90 p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.25)] sm:p-8 lg:p-10">
             <div className="grid gap-6 md:grid-cols-3">
               {whyChoose.map((item, index) => (
                 <div
@@ -428,8 +485,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
-          <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-gray-200 bg-white p-8 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.25)] lg:p-10">
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+          <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-gray-200 bg-white p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.25)] sm:p-8 lg:p-10">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="max-w-2xl">
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-600">Gabung sekarang</p>
@@ -439,10 +496,10 @@ export default function LandingPage() {
                 </p>
               </div>
               <Link
-                to="/login"
+                to="/register"
                 className="rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
               >
-                Gabung Sekarang
+                Daftar Jadi Member
               </Link>
             </div>
           </div>
@@ -450,7 +507,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="border-t border-gray-200 bg-white/80">
-        <div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 text-sm text-gray-600 lg:grid-cols-3 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 text-sm text-gray-600 sm:px-6 lg:grid-cols-3 lg:px-8">
           <div>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-blue-600 text-sm font-black text-white shadow-md">
@@ -474,7 +531,7 @@ export default function LandingPage() {
             <p className="leading-7">Minggu: 09.00 – 17.00</p>
           </div>
         </div>
-        <div className="border-t border-gray-200 px-6 py-4 text-center text-sm text-gray-500 lg:px-8">
+        <div className="border-t border-gray-200 px-4 py-4 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
           © 2025 Toko Buku Cendekia. All rights reserved.
         </div>
       </footer>
