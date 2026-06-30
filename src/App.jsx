@@ -21,6 +21,7 @@ const TrackingPage = lazy(() => import('./pages/TrackingPage'));
 const ReportsPage = lazy(() => import('./pages/ReportsPage'));
 const OmnichannelPage = lazy(() => import('./pages/OmnichannelPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const LandingPage = lazy(() => import('./pages/LandingPage'));
 
 // [TAMBAHKAN] Import UsersPage
 const UsersPage = lazy(() => import('./pages/UsersPage'));
@@ -34,8 +35,10 @@ function App() {
   return (
     <Suspense fallback={<Loading />}>
       <Routes>
+        <Route path="/" element={<LandingPage />} />
+
         <Route element={<MainLayout />}>
-          <Route path="/" element={<DashboardPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/customers/:id" element={<CustomerDetailPage />} /> 
           <Route path="/transactions" element={<TransactionsPage />} />
