@@ -1,6 +1,6 @@
 // src/pages/TransactionsPage.jsx
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaPlus, FaSearch, FaEye, FaChevronLeft, FaChevronRight, FaShoppingBag, FaStore, FaWhatsapp, FaShopify } from 'react-icons/fa';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { getTransactions } from '../data/transactions';
@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function TransactionsPage() {
+  const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -193,7 +194,7 @@ export default function TransactionsPage() {
           <TransactionCard 
             key={transaction.id}
             transaction={transaction} 
-            onViewDetail={() => window.location.href = `/tracking/${transaction.id}`} 
+            onViewDetail={() => navigate(`/tracking/${transaction.id}`)} 
           />
         ))}
       </div>

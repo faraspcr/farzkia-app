@@ -73,7 +73,7 @@ export default function Login() {
         // Login berhasil
         const userData = response.data[0];
         localStorage.setItem("user", JSON.stringify(userData));
-        navigate("/");
+        navigate("/dashboard");
       } else {
         // Cek apakah email ada (tanpa password)
         try {
