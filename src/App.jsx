@@ -20,6 +20,7 @@ const FeedbackPage = lazy(() => import('./pages/FeedbackPage'));
 const TrackingPage = lazy(() => import('./pages/TrackingPage'));
 const ReportsPage = lazy(() => import('./pages/ReportsPage'));
 const OmnichannelPage = lazy(() => import('./pages/OmnichannelPage'));
+const ProductsPage = lazy(() => import('./pages/ProductsPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 
@@ -50,6 +51,7 @@ function App() {
           <Route path="/tracking/:id" element={<TrackingPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/omnichannel" element={<OmnichannelPage />} />
+          <Route path="/products" element={<ProductsPage />} />
           
           {/* [TAMBAHKAN] Route untuk UsersPage */}
           <Route path="/users" element={<UsersPage />} />

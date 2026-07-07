@@ -1,6 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCheckCircle } from 'react-icons/fa';
+import { 
+  FaUser, 
+  FaEnvelope, 
+  FaLock, 
+  FaEye, 
+  FaEyeSlash, 
+  FaCheckCircle,
+  FaBookOpen,
+} from 'react-icons/fa';
+import { BsFillExclamationDiamondFill } from 'react-icons/bs';
+import { ImSpinner2 } from 'react-icons/im';
 import axios from 'axios';
 
 // ============================================
@@ -15,15 +25,53 @@ const headers = {
   "Content-Type": "application/json",
 }
 
+// SLIDESHOW DATA DENGAN GAMBAR
+const slides = [
+  {
+    image: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800&h=600&fit=crop",
+    title: "Bergabung dengan Cendekia",
+    description: "Daftar sekarang dan kelola toko buku Anda dengan lebih mudah"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=800&h=600&fit=crop",
+    title: "Manajemen Pelanggan",
+    description: "Catat dan kelola data pelanggan dengan sistem terintegrasi"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1434626881859-194d67b2b86f?w=800&h=600&fit=crop",
+    title: "Analisis Penjualan",
+    description: "Pantau performa penjualan dan buat keputusan bisnis yang tepat"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&h=600&fit=crop",
+    title: "Toko Buku Cendekia",
+    description: "Solusi lengkap untuk manajemen toko buku modern"
+  }
+];
+
 export default function Register() {
   const navigate = useNavigate();
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [form, setForm] = useState({ 
+    name: '', 
+    email: '', 
+    password: '', 
+    confirm: '' 
+  });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // AUTO SLIDE
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const validate = () => {
     const err = {};
@@ -49,7 +97,6 @@ export default function Register() {
     setErrors({});
     
     try {
-      // Cek apakah email sudah terdaftar
       const checkResponse = await axios.get(
         `${API_URL}?email=ilike.${form.email}`,
         { headers }
@@ -61,7 +108,6 @@ export default function Register() {
         return;
       }
       
-      // Buat user baru di Supabase
       const userData = {
         email: form.email,
         password: form.password,
@@ -72,11 +118,8 @@ export default function Register() {
       await axios.post(API_URL, userData, { headers });
       
       setSuccess('Pendaftaran berhasil! Silakan login.');
-      
-      // Reset form
       setForm({ name: '', email: '', password: '', confirm: '' });
       
-      // Redirect ke login setelah 2 detik
       setTimeout(() => {
         navigate('/login');
       }, 2000);
@@ -100,135 +143,275 @@ export default function Register() {
   const strengthLabel = ['', 'Lemah', 'Cukup', 'Kuat'][strength];
 
   return (
-    <div>
-      <h2 className="text-2xl font-semibold text-gray-800 mb-2 text-center">Buat Akun Baru</h2>
-      <p className="text-center text-gray-500 text-sm mb-6">Daftar ke CRM Toko Buku Cendekia</p>
-      
-      {/* Loading */}
-      {loading && (
-        <div className="bg-gray-100 text-blue-600 p-3 rounded-lg text-sm mb-4 text-center">
-          ⏳ Memproses...
-        </div>
-      )}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+      {/* Container utama */}
+      <div className="w-full max-w-7xl h-[95vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+        
+        {/* LEFT SIDE - SLIDESHOW (50%) */}
+        <div className="w-full md:w-1/2 relative overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
+            style={{ 
+              backgroundImage: `url(${slides[currentSlide].image})`,
+              transform: 'scale(1.05)'
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/50" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl -mr-48 -mt-48" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl -ml-48 -mb-48" />
 
-      {/* Error dari API */}
-      {apiError && (
-        <div className="bg-red-100 text-red-700 p-3 rounded-lg text-sm mb-4 border border-red-300">
-          ⚠️ {apiError}
-        </div>
-      )}
-
-      {/* Success */}
-      {success && (
-        <div className="bg-green-100 text-green-700 p-3 rounded-lg text-sm mb-4 border border-green-300">
-          ✅ {success}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Nama Lengkap</label>
-          <div className="relative">
-            <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="Nama Anda" 
-              value={form.name} 
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              disabled={loading}
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600 disabled:bg-gray-100" 
-            />
-          </div>
-          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
-          <div className="relative">
-            <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input 
-              type="email" 
-              placeholder="email@example.com" 
-              value={form.email} 
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              disabled={loading}
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600 disabled:bg-gray-100" 
-            />
-          </div>
-          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Password</label>
-          <div className="relative">
-            <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input 
-              type={showPass ? 'text' : 'password'} 
-              placeholder="Min. 6 karakter" 
-              value={form.password} 
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              disabled={loading}
-              className="w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600 disabled:bg-gray-100" 
-            />
-            <button 
-              type="button" 
-              onClick={() => setShowPass(!showPass)}
-              disabled={loading}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-            >
-              {showPass ? <FaEyeSlash /> : <FaEye />}
-            </button>
-          </div>
-          {form.password.length > 0 && (
-            <div className="flex items-center gap-2 mt-2">
-              <div className="flex-1 h-1.5 rounded-full bg-gray-200 overflow-hidden">
-                <div className="h-full rounded-full transition-all" style={{ width: `${(strength / 3) * 100}%`, backgroundColor: strengthColor }}></div>
-              </div>
-              <span className="text-xs" style={{ color: strengthColor }}>{strengthLabel}</span>
+          <div className="relative z-10 h-full flex flex-col justify-center items-center text-white p-12">
+            <div className="absolute top-8 left-8 flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
+              <FaBookOpen className="text-2xl text-blue-300" />
+              <span className="text-lg font-bold tracking-wide">Cendekia</span>
             </div>
-          )}
-          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Konfirmasi Password</label>
-          <div className="relative">
-            <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input 
-              type={showConfirm ? 'text' : 'password'} 
-              placeholder="Ulangi password" 
-              value={form.confirm} 
-              onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-              disabled={loading}
-              className="w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600 disabled:bg-gray-100" 
-            />
-            <button 
-              type="button" 
-              onClick={() => setShowConfirm(!showConfirm)}
-              disabled={loading}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-            >
-              {form.confirm && form.confirm === form.password ? 
-                <FaCheckCircle className="text-green-500" /> : 
-                showConfirm ? <FaEyeSlash /> : <FaEye />
-              }
-            </button>
+            <div className="text-center max-w-lg">
+              <div className="transition-all duration-500">
+                <h3 className="text-3xl md:text-4xl font-bold mb-4 drop-shadow-lg">
+                  {slides[currentSlide].title}
+                </h3>
+                <p className="text-blue-100 text-base md:text-lg drop-shadow-md">
+                  {slides[currentSlide].description}
+                </p>
+              </div>
+              <div className="mt-8 text-sm text-white/60">
+                {currentSlide + 1} / {slides.length}
+              </div>
+              <div className="flex justify-center gap-3 mt-4">
+                {slides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      currentSlide === index 
+                        ? "w-10 bg-white shadow-lg" 
+                        : "w-2 bg-white/40 hover:bg-white/60"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
-          {errors.confirm && <p className="text-red-500 text-xs mt-1">{errors.confirm}</p>}
         </div>
 
-        <button 
-          type="submit" 
-          disabled={loading}
-          className="w-full bg-blue-700 text-white py-2 rounded-lg font-semibold hover:bg-blue-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          {loading ? 'Memproses...' : 'Daftar Sekarang'}
-        </button>
-      </form>
+        {/* RIGHT SIDE - REGISTER FORM (50%) - DIPERBESAR */}
+        <div className="w-full md:w-1/2 p-8 md:p-10 lg:p-12 bg-gradient-to-br from-white to-gray-50/80 flex items-center justify-center overflow-y-auto">
+          <div className="w-full max-w-lg mx-auto">
+            {/* Header - Lebih besar */}
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-1.5 h-8 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full" />
+                <h2 className="text-3xl font-bold text-gray-800">
+                  Buat Akun Baru
+                </h2>
+              </div>
+              <p className="text-gray-500 text-sm ml-5">
+                Daftar ke CRM Toko Buku Cendekia
+              </p>
+            </div>
 
-      <p className="text-center text-sm text-gray-500 mt-4">
-        Sudah punya akun? <Link to="/login" className="text-blue-600 font-semibold">Masuk</Link>
-      </p>
+            {/* Error & Success */}
+            {apiError && (
+              <div className="bg-red-50/80 backdrop-blur-sm border border-red-200 mb-4 p-4 text-sm text-red-700 rounded-xl flex items-center gap-2">
+                <BsFillExclamationDiamondFill className="text-red-500 flex-shrink-0 text-lg" />
+                <span>{apiError}</span>
+              </div>
+            )}
+
+            {success && (
+              <div className="bg-green-50/80 backdrop-blur-sm border border-green-200 mb-4 p-4 text-sm text-green-700 rounded-xl flex items-center gap-2">
+                <FaCheckCircle className="text-green-500 flex-shrink-0 text-lg" />
+                <span>{success}</span>
+              </div>
+            )}
+
+            {loading && (
+              <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200 mb-4 p-4 text-sm text-blue-700 rounded-xl flex items-center gap-2">
+                <ImSpinner2 className="animate-spin text-lg" />
+                <span>Memproses...</span>
+              </div>
+            )}
+
+            {/* Form - Spacing lebih besar */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Nama Lengkap */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Nama Lengkap
+                </label>
+                <div className="relative group">
+                  <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors text-base" />
+                  <input 
+                    type="text" 
+                    placeholder="Nama Anda" 
+                    value={form.name} 
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    disabled={loading}
+                    className="w-full pl-12 pr-4 py-3.5 bg-gray-50/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:bg-white hover:border-gray-300 disabled:bg-gray-100 text-base"
+                  />
+                </div>
+                {errors.name && <p className="text-red-500 text-xs mt-1.5">{errors.name}</p>}
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Email Address
+                </label>
+                <div className="relative group">
+                  <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors text-base" />
+                  <input 
+                    type="email" 
+                    placeholder="email@example.com" 
+                    value={form.email} 
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    disabled={loading}
+                    className="w-full pl-12 pr-4 py-3.5 bg-gray-50/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:bg-white hover:border-gray-300 disabled:bg-gray-100 text-base"
+                  />
+                </div>
+                {errors.email && <p className="text-red-500 text-xs mt-1.5">{errors.email}</p>}
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Password
+                </label>
+                <div className="relative group">
+                  <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors text-base" />
+                  <input 
+                    type={showPass ? 'text' : 'password'} 
+                    placeholder="Min. 6 karakter" 
+                    value={form.password} 
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    disabled={loading}
+                    className="w-full pl-12 pr-12 py-3.5 bg-gray-50/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:bg-white hover:border-gray-300 disabled:bg-gray-100 text-base"
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => setShowPass(!showPass)}
+                    disabled={loading}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showPass ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                
+                {form.password.length > 0 && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="flex-1 h-1.5 rounded-full bg-gray-200 overflow-hidden">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${(strength / 3) * 100}%`, backgroundColor: strengthColor }}></div>
+                    </div>
+                    <span className="text-xs font-medium" style={{ color: strengthColor }}>{strengthLabel}</span>
+                  </div>
+                )}
+                {errors.password && <p className="text-red-500 text-xs mt-1.5">{errors.password}</p>}
+              </div>
+
+              {/* Konfirmasi Password */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Konfirmasi Password
+                </label>
+                <div className="relative group">
+                  <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors text-base" />
+                  <input 
+                    type={showConfirm ? 'text' : 'password'} 
+                    placeholder="Ulangi password" 
+                    value={form.confirm} 
+                    onChange={(e) => setForm({ ...form, confirm: e.target.value })}
+                    disabled={loading}
+                    className="w-full pl-12 pr-12 py-3.5 bg-gray-50/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:bg-white hover:border-gray-300 disabled:bg-gray-100 text-base"
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    disabled={loading}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {form.confirm && form.confirm === form.password ? 
+                      <FaCheckCircle className="text-green-500 text-lg" /> : 
+                      showConfirm ? <FaEyeSlash /> : <FaEye />
+                    }
+                  </button>
+                </div>
+                {errors.confirm && <p className="text-red-500 text-xs mt-1.5">{errors.confirm}</p>}
+              </div>
+
+              {/* Submit - Lebih besar */}
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] text-base"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <ImSpinner2 className="animate-spin" />
+                    Memproses...
+                  </span>
+                ) : (
+                  'Daftar Sekarang'
+                )}
+              </button>
+            </form>
+
+            {/* Login Link */}
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-500">
+                Sudah punya akun?{" "}
+                <Link 
+                  to="/login" 
+                  className="text-blue-600 font-semibold hover:text-blue-800 transition hover:underline"
+                >
+                  Masuk
+                </Link>
+              </p>
+            </div>
+
+            {/* Divider */}
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-4 bg-white text-gray-400">Keuntungan Bergabung</span>
+              </div>
+            </div>
+
+            {/* Benefits - Lebih besar */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 rounded-xl p-3 text-center border border-blue-100/50 hover:shadow-md transition">
+                <div className="text-blue-600 text-xl mb-1">📚</div>
+                <p className="text-sm font-semibold text-gray-700">Kelola Buku</p>
+              </div>
+              <div className="bg-gradient-to-r from-green-50/80 to-emerald-50/80 rounded-xl p-3 text-center border border-green-100/50 hover:shadow-md transition">
+                <div className="text-green-600 text-xl mb-1">👥</div>
+                <p className="text-sm font-semibold text-gray-700">Manajemen Customer</p>
+              </div>
+              <div className="bg-gradient-to-r from-purple-50/80 to-pink-50/80 rounded-xl p-3 text-center border border-purple-100/50 hover:shadow-md transition">
+                <div className="text-purple-600 text-xl mb-1">📊</div>
+                <p className="text-sm font-semibold text-gray-700">Analisis Penjualan</p>
+              </div>
+              <div className="bg-gradient-to-r from-orange-50/80 to-amber-50/80 rounded-xl p-3 text-center border border-orange-100/50 hover:shadow-md transition">
+                <div className="text-orange-600 text-xl mb-1">🛡️</div>
+                <p className="text-sm font-semibold text-gray-700">Aman & Terpercaya</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-8px); }
+          75% { transform: translateX(8px); }
+        }
+        .animate-shake {
+          animation: shake 0.5s ease-in-out;
+        }
+      `}</style>
     </div>
   );
 }

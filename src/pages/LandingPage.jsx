@@ -1,624 +1,610 @@
-﻿import { useEffect, useMemo } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getCustomerStats } from '../data/customers';
-import { getFeedbackStats } from '../data/feedbacks';
-import { getTransactionStats } from '../data/transactions';
 
-const navItems = [
-  { label: 'Beranda', target: 'beranda' },
-  { label: 'Produk', target: 'produk' },
-  { label: 'Loyalitas', target: 'loyalitas' },
-  { label: 'Promo', target: 'promo' },
-];
-
-const featuredProducts = [
-  {
-    name: 'Buku Paket SD',
-    price: 'Rp 45.000',
-    description: 'Lengkap untuk kurikulum terbaru dengan kualitas cetak terbaik.',
-    accent: 'from-blue-500 to-cyan-500',
-    emoji: '📘',
-  },
-  {
-    name: 'Alat Tulis Premium',
-    price: 'Rp 18.000',
-    description: 'Pensil, bolpoin, dan stationery favorit anak sekolah dan mahasiswa.',
-    accent: 'from-amber-400 to-orange-500',
-    emoji: '✏️',
-  },
-  {
-    name: 'Kamus Bahasa',
-    price: 'Rp 95.000',
-    description: 'Referensi lengkap untuk belajar dan kebutuhan akademik.',
-    accent: 'from-emerald-500 to-teal-500',
-    emoji: '📖',
-  },
-  {
-    name: 'Kitab dan Referensi',
-    price: 'Rp 120.000',
-    description: 'Koleksi pilihan untuk pembelajaran dan kegiatan keagamaan.',
-    accent: 'from-violet-500 to-indigo-500',
-    emoji: '🕯️',
-  },
-];
-
-const loyaltyTiers = [
-  {
-    name: 'Reguler',
-    points: '0–99 poin',
-    perks: ['Poin standar', 'Akses promo member', 'Notifikasi produk terbaru'],
-    accent: 'from-slate-100 to-slate-200',
-    text: 'text-slate-700',
-  },
-  {
-    name: 'Silver',
-    points: '100–299 poin',
-    perks: ['Diskon 5%', 'Poin 1.5x', 'Prioritas stok favorit'],
-    accent: 'from-slate-200 to-blue-100',
-    text: 'text-blue-700',
-  },
-  {
-    name: 'Gold',
-    points: '300+ poin',
-    perks: ['Diskon 10%', 'Poin 2x', 'Pre-order prioritas'],
-    accent: 'from-amber-100 to-orange-200',
-    text: 'text-amber-700',
-  },
-];
-
-const promos = [
-  {
-    title: 'Promo Awal Tahun Ajaran Baru',
-    description: 'Diskon 10% untuk buku paket dan alat tulis yang dibutuhkan sekolah.',
-    badge: 'Diskon 10%',
-  },
-  {
-    title: 'Ramadhan Berkah',
-    description: "Diskon 15% untuk Al-Qur'an, kitab Islam, dan kebutuhan ibadah.",
-    badge: 'Diskon 15%',
-  },
-];
-
-const testimonials = [
-  {
-    name: 'Aisyah Putri',
-    role: 'Orang Tua Murid',
-    quote: 'Best bookshop di Pekanbaru! Pelayanan WhatsApp sangat responsif.',
-  },
-  {
-    name: 'Rama Wijaya',
-    role: 'Mahasiswa',
-    quote: 'Koleksi kitab lengkap dan pelayanan terasa personal.',
-  },
-  {
-    name: 'Dewi Lestari',
-    role: 'Pelanggan Loyal',
-    quote: 'Produk berkualitas dan sistem loyalitas terasa jelas dan bermanfaat.',
-  },
-];
-
-const whyChoose = [
-  {
-    title: 'Katalog lengkap',
-    description: 'Dapatkan buku, alat tulis, dan referensi berkualitas dalam satu tempat.',
-    icon: '📚',
-  },
-  {
-    title: 'Layanan personal',
-    description: 'Kebutuhan pelanggan lebih mudah dipantau dengan sistem yang terorganisir.',
-    icon: '💬',
-  },
-  {
-    title: 'Promo yang relevan',
-    description: 'Program loyalitas dan campaign aktif disusun agar pelanggan selalu merasa dihargai.',
-    icon: '🎁',
-  },
-];
-
-export default function LandingPage() {
-  const navigate = useNavigate();
-  const customerStats = useMemo(() => getCustomerStats(), []);
-  const feedbackStats = useMemo(() => getFeedbackStats(), []);
-  const transactionStats = useMemo(() => getTransactionStats(), []);
+// ============================================================
+// 3D COVERFLOW CAROUSEL - APPLE STYLE
+// ============================================================
+const CoverflowCarousel = ({ items }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const containerRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    const elements = document.querySelectorAll('.reveal-on-scroll');
+    const interval = setInterval(() => {
+      if (!isDragging && !isAnimating) {
+        setActiveIndex(prev => (prev + 1) % items.length);
+      }
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [items.length, isDragging, isAnimating]);
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartX(e.clientX);
+    setDragOffset(0);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    const diff = e.clientX - startX;
+    setDragOffset(diff);
+  };
+
+  const handleMouseUp = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    setIsAnimating(true);
+    
+    if (Math.abs(dragOffset) > 50) {
+      if (dragOffset > 0) {
+        setActiveIndex(prev => (prev - 1 + items.length) % items.length);
+      } else {
+        setActiveIndex(prev => (prev + 1) % items.length);
+      }
+    }
+    
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 300);
+    setDragOffset(0);
+  };
+
+  const getCardStyle = (index) => {
+    const diff = index - activeIndex;
+    const isCenter = diff === 0;
+    
+    let translateX = diff * 220;
+    let scale = 1;
+    let rotateY = 0;
+    let opacity = 1;
+    let zIndex = 10;
+    
+    if (isCenter) {
+      scale = 1.1;
+      zIndex = 50;
+      opacity = 1;
+      rotateY = 0;
+    } else if (Math.abs(diff) === 1) {
+      scale = 0.85;
+      zIndex = 30;
+      opacity = 0.8;
+      rotateY = diff > 0 ? -15 : 15;
+      translateX = diff > 0 ? 180 : -180;
+    } else if (Math.abs(diff) === 2) {
+      scale = 0.65;
+      zIndex = 20;
+      opacity = 0.5;
+      rotateY = diff > 0 ? -25 : 25;
+      translateX = diff > 0 ? 330 : -330;
+    } else {
+      scale = 0.4;
+      zIndex = 10;
+      opacity = 0.2;
+      rotateY = diff > 0 ? -35 : 35;
+      translateX = diff > 0 ? 480 : -480;
+    }
+
+    if (isDragging && isCenter) {
+      translateX += dragOffset * 0.5;
+    } else if (isDragging && Math.abs(diff) === 1) {
+      translateX += dragOffset * 0.3;
+    }
+
+    return {
+      transform: `translateX(${translateX}px) scale(${scale}) rotateY(${rotateY}deg)`,
+      opacity: opacity,
+      zIndex: zIndex,
+      transition: isDragging ? 'none' : 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)',
+      transformStyle: 'preserve-3d',
+    };
+  };
+
+  return (
+    <div 
+      ref={containerRef}
+      className="relative w-full h-[420px] overflow-hidden cursor-grab select-none"
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      onTouchStart={(e) => {
+        setIsDragging(true);
+        setStartX(e.touches[0].clientX);
+      }}
+      onTouchMove={(e) => {
+        if (!isDragging) return;
+        const diff = e.touches[0].clientX - startX;
+        setDragOffset(diff);
+      }}
+      onTouchEnd={handleMouseUp}
+    >
+      <div className="absolute inset-0 flex items-center justify-center" style={{ perspective: '1200px' }}>
+        {items.map((item, index) => {
+          const style = getCardStyle(index);
+          return (
+            <div
+              key={index}
+              className="absolute cursor-pointer"
+              style={{
+                ...style,
+                width: '240px',
+                left: '50%',
+                marginLeft: '-120px',
+                transformStyle: 'preserve-3d',
+                willChange: 'transform, opacity',
+              }}
+              onClick={() => {
+                if (!isDragging && Math.abs(dragOffset) < 20) {
+                  setActiveIndex(index);
+                }
+              }}
+            >
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-white group">
+                <img
+                  src={item.image}
+                  alt={item.text}
+                  className="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="p-4 text-center bg-white">
+                  <p className="font-bold text-gray-800 text-base">{item.text}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-50">
+        {items.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setActiveIndex(i)}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              i === activeIndex ? 'w-8 bg-blue-600' : 'w-3 bg-blue-200 hover:bg-blue-400'
+            }`}
+          />
+        ))}
+      </div>
+
+      <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+    </div>
+  );
+};
+
+// ============================================================
+// BANNER SLIDER
+// ============================================================
+const BannerSlider = () => {
+  const slides = [
+    {
+      image: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=600&h=400",
+      title: "Kelola Stok Buku dengan Mudah",
+      desc: "Pantau stok buku, alat tulis, dan kitab dalam satu dashboard"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=600&h=400",
+      title: "Program Loyalitas Pelanggan",
+      desc: "Tingkatkan retensi dengan sistem poin dan reward"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=600&h=400",
+      title: "Omnichannel Integration",
+      desc: "Hubungkan WhatsApp, Toko, Shopee dalam satu sistem"
+    },
+  ];
+
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent(prev => (prev + 1) % slides.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [slides.length]);
+
+  return (
+    <div className="relative w-full h-[300px] sm:h-[350px] lg:h-[400px] rounded-2xl overflow-hidden shadow-2xl">
+      {slides.map((slide, index) => (
+        <div
+          key={index}
+          className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+            index === current ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+          }`}
+        >
+          <img
+            src={slide.image}
+            alt={slide.title}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+            <h3 className="text-xl sm:text-2xl font-bold">{slide.title}</h3>
+            <p className="text-sm sm:text-base text-white/80 mt-1">{slide.desc}</p>
+          </div>
+        </div>
+      ))}
+      
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              i === current ? 'w-6 bg-white' : 'w-1.5 bg-white/50'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ============================================================
+// MAIN
+// ============================================================
+export default function LandingPage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible');
           }
         });
       },
-      { threshold: 0.16 }
+      { threshold: 0.1 }
     );
-
-    elements.forEach((element) => observer.observe(element));
-
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 
-  const scrollToSection = (targetId) => {
-    const element = document.getElementById(targetId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+  const scrollTo = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const handleQuickAction = (path) => {
-    navigate(path);
-  };
+  const catalogItems = [
+    { image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=400", text: "Buku Novel" },
+    { image: "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?auto=format&fit=crop&q=80&w=400", text: "Buku Anak" },
+    { image: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=400", text: "Kitab Islam" },
+    { image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=400", text: "Alat Tulis" },
+    { image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=400", text: "Kamus Bahasa" },
+    { image: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=400", text: "Buku Pelajaran" },
+  ];
+
+  const features = [
+    { icon: '📊', title: 'Analitik Penjualan Real-Time', desc: 'Pantau total sales, total order, dan grafik metrik pertumbuhan bisnis Anda dalam satu dasbor terintegrasi.' },
+    { icon: '👥', title: 'Manajemen Data Pelanggan', desc: 'Kelola data kontak, riwayat transaksi, dan tingkatkan loyalitas pelanggan dengan sistem tiering yang rapi.' },
+    { icon: '🔔', title: 'Peringatan Stok Otomatis', desc: 'Sistem alert pintar yang otomatis mengingatkan Anda saat kuantitas stok produk atau komoditas toko mulai menipis.' },
+  ];
+
+  const faqs = [
+    { q: 'Apakah CendekiaBook bisa diakses gratis?', a: 'Ya! Kami menyediakan paket dasar gratis selamanya untuk UMKM, serta paket premium untuk fitur analitik yang lebih mendalam.' },
+    { q: 'Apakah data pelanggan saya aman di sini?', a: 'Tentu! Data pelanggan dienkripsi dengan standar keamanan tertinggi dan kami tidak pernah membagikan data ke pihak ketiga.' },
+    { q: 'Bagaimana cara menghubungkan CRM ini dengan WhatsApp?', a: 'Anda dapat mengintegrasikannya dengan mudah melalui pengaturan integrasi API yang sudah disediakan di dalam dasbor.' },
+    { q: 'Berapa lama setup aplikasi?', a: 'Hanya 5 menit! Anda sudah bisa langsung mengelola toko buku Anda.' },
+  ];
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(239,68,68,0.16),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(59,130,246,0.16),_transparent_30%),linear-gradient(135deg,_#fefefe_0%,_#f7faff_45%,_#fef8f8_100%)] text-gray-800">
+    <div className="min-h-screen bg-white text-gray-800">
+      
       <style>{`
-        html {
-          scroll-behavior: smooth;
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
         }
-
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(24px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
         }
-
-        .animate-fade-in-up {
-          animation: fadeInUp 0.8s ease-out both;
-        }
-
-        .reveal-on-scroll {
+        .fade-up {
           opacity: 0;
-          transform: translateY(24px);
-          transition: opacity 0.8s ease, transform 0.8s ease;
-          will-change: transform, opacity;
+          transform: translateY(30px);
+          transition: all 0.7s ease;
         }
-
-        .reveal-on-scroll.is-visible {
+        .fade-up.is-visible {
           opacity: 1;
           transform: translateY(0);
-          animation: none;
         }
-
-        @media (prefers-reduced-motion: reduce) {
-          html {
-            scroll-behavior: auto;
-          }
-
-          .animate-fade-in-up,
-          .reveal-on-scroll {
-            animation: none !important;
-            transition: none !important;
-          }
+        .btn-gradient {
+          background: linear-gradient(135deg, #2563eb, #1d4ed8);
+          background-size: 200% 200%;
+          animation: shimmer 3s ease-in-out infinite;
+        }
+        .text-gradient {
+          background: linear-gradient(135deg, #2563eb, #7c3aed);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+        .card-hover {
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-hover:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 20px 60px rgba(37, 99, 235, 0.12);
+        }
+        .float-anim {
+          animation: float 5s ease-in-out infinite;
         }
       `}</style>
 
-      <header className="sticky top-0 z-50 border-b border-white/70 bg-white/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
-          <div className="animate-fade-in-up">
-            <button
-              type="button"
-              onClick={() => scrollToSection('beranda')}
-              className="flex items-center gap-3 text-left"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-blue-600 text-lg font-black text-white shadow-lg shadow-blue-200">
-                C
-              </div>
-              <div>
-                <h1 className="text-lg font-black tracking-tight text-blue-700">Cendekia</h1>
-                <p className="text-xs text-gray-500">Toko Buku & Alat Tulis</p>
-              </div>
-            </button>
+      {/* ============================================================
+      NAVBAR
+      ============================================================ */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+          <div onClick={() => scrollTo('home')} className="flex items-center gap-2 cursor-pointer group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-blue-200 group-hover:scale-110 transition">C</div>
+            <span className="font-bold text-xl text-gray-800">CendekiaBook</span>
           </div>
-
-          <nav className="hidden items-center gap-6 md:flex">
-            {navItems.map((item, index) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={() => scrollToSection(item.target)}
-                className="animate-fade-in-up text-sm font-semibold text-gray-600 transition duration-300 hover:text-blue-600"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                {item.label}
+          
+          <nav className="hidden md:flex gap-8 text-sm font-medium">
+            {['Fitur', 'FAQ', 'Tentang', 'Kontak'].map(item => (
+              <button key={item} onClick={() => scrollTo(item.toLowerCase())} className="text-gray-500 hover:text-blue-600 transition">
+                {item}
               </button>
             ))}
           </nav>
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              to="/register"
-              className="animate-fade-in-up hidden rounded-full border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-700 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-50 sm:inline-flex"
-            >
-              Daftar
-            </Link>
-            <Link
-              to="/login"
-              className="animate-fade-in-up rounded-full border border-blue-600 px-4 py-2 text-sm font-semibold text-blue-600 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white hover:shadow-lg"
-            >
-              Masuk
-            </Link>
-          </div>
-
-          <nav className="flex w-full items-center justify-center gap-2 border-t border-gray-100 pt-3 md:hidden">
-            {navItems.map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={() => scrollToSection(item.target)}
-                className="rounded-full px-3 py-1.5 text-sm font-semibold text-gray-600 transition hover:bg-blue-50 hover:text-blue-600"
-              >
-                {item.label}
-              </button>
-            ))}
-          </nav>
+          
+          <Link to="/login" className="px-5 py-1.5 rounded-full btn-gradient text-white text-sm font-medium shadow-lg shadow-blue-200 hover:scale-105 transition">
+            Masuk ke Aplikasi
+          </Link>
         </div>
       </header>
 
-      <main id="beranda">
-        <section className="relative overflow-hidden px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(239,68,68,0.16),transparent_24%),radial-gradient(circle_at_80%_20%,rgba(59,130,246,0.16),transparent_24%)]" />
-          <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
-            <div className="animate-fade-in-up reveal-on-scroll text-center lg:text-left">
-              <div className="mb-5 inline-flex items-center rounded-full border border-red-100 bg-white/80 px-4 py-2 text-sm font-semibold text-red-600 shadow-sm backdrop-blur">
-                CRM untuk toko buku modern
+      {/* ============================================================
+      MAIN
+      ============================================================ */}
+      <main className="pt-16">
+        
+        {/* ===== HERO ===== */}
+        <section id="home" className="relative overflow-hidden scroll-mt-16 min-h-[90vh] flex items-center">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 w-full">
+            <div className="grid lg:grid-cols-2 gap-10 items-center">
+              
+              <div className="fade-up space-y-5">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-sm font-semibold text-blue-700">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                  🚀 Platform Manajemen Toko Buku
+                </div>
+                
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] text-gray-900">
+                  Kelola Toko Buku <br/>
+                  <span className="text-gradient">Modern & Efisien</span>
+                </h1>
+                
+                <p className="text-gray-500 text-base max-w-md leading-relaxed">
+                  Sistem manajemen terintegrasi untuk toko buku, alat tulis, dan kebutuhan pendidikan. Pantau stok, kelola pelanggan, dan tingkatkan penjualan dengan mudah.
+                </p>
+                
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <button className="px-8 py-3 rounded-full btn-gradient text-white font-medium shadow-lg shadow-blue-200 hover:shadow-xl transition text-sm">
+                    🚀 Coba Gratis
+                  </button>
+                </div>
+
+                <div className="flex gap-6 pt-2 text-sm">
+                  <div><span className="font-bold text-gray-800">30+</span> <span className="text-gray-400">Toko Bergabung</span></div>
+                  <div><span className="font-bold text-gray-800">4.8/5</span> <span className="text-gray-400">Kepuasan</span></div>
+                  <div><span className="font-bold text-gray-800">150+</span> <span className="text-gray-400">Produk Terkelola</span></div>
+                </div>
               </div>
-              <h2 className="mx-auto max-w-2xl text-3xl font-black leading-tight text-gray-900 sm:text-4xl lg:mx-0 lg:text-6xl">
-                Solusi cerdas untuk toko buku yang ingin tumbuh lebih cepat.
+
+              <div className="fade-up">
+                <BannerSlider />
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ===== FEATURES ===== */}
+        <section id="fitur" className="max-w-6xl mx-auto px-4 sm:px-6 py-20 scroll-mt-16">
+          <div className="fade-up text-center mb-16">
+            <span className="text-sm font-semibold uppercase tracking-widest text-blue-600">Fitur Unggulan</span>
+            <h2 className="text-3xl sm:text-4xl font-black mt-2 text-gray-900">
+              Solusi CRM Lengkap untuk <span className="text-gradient">Bisnis Anda</span>
+            </h2>
+            <p className="text-gray-500 mt-2 max-w-2xl mx-auto">Kelola toko buku Anda dengan lebih efisien dan terukur</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {features.map((f, i) => (
+              <div key={i} className="fade-up card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100" style={{ transitionDelay: `${i * 100}ms` }}>
+                <div className="text-4xl mb-4">{f.icon}</div>
+                <h3 className="text-xl font-bold text-gray-900">{f.title}</h3>
+                <p className="text-gray-500 text-sm mt-2 leading-relaxed">{f.desc}</p>
+                <div className="mt-4 p-4 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl text-center text-sm font-medium text-gray-400 border border-dashed border-gray-200">
+                  📱 Mockup Preview
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ===== 3D COVERFLOW CATALOG ===== */}
+        <section className="py-20 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="fade-up text-center mb-12">
+              <span className="text-sm font-extrabold uppercase tracking-widest text-blue-600">KATALOG POPULER 3D</span>
+              <h2 className="text-3xl sm:text-5xl font-black mt-2 text-gray-900">
+                Eksplorasi Koleksi <span className="text-gradient">Terbaik Kami</span>
               </h2>
-              <p className="mx-auto mt-5 max-w-xl text-base leading-8 text-gray-600 sm:text-lg lg:mx-0">
-                Cendekia membantu Anda mengelola pelanggan, stok, loyalitas, dan promo dengan pengalaman yang lebih modern, cepat, dan terorganisir.
-              </p>
-              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
-                <button
-                  type="button"
-                  onClick={() => handleQuickAction('/login')}
-                  className="rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-                >
-                  Belanja Sekarang
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollToSection('produk')}
-                  className="rounded-full border border-gray-300 bg-white/80 px-6 py-3 text-sm font-semibold text-gray-700 transition duration-300 hover:-translate-y-1 hover:border-blue-600 hover:text-blue-600 hover:shadow-md"
-                >
-                  Lihat Produk
-                </button>
-              </div>
-
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 shadow-sm">
-                  <p className="text-xl font-bold text-blue-700">{customerStats.total.toLocaleString()}+</p>
-                  <p className="text-sm text-gray-500">Pelanggan terdaftar</p>
-                </div>
-                <div className="rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 shadow-sm">
-                  <p className="text-xl font-bold text-red-500">{feedbackStats.averageRating}/5</p>
-                  <p className="text-sm text-gray-500">Kepuasan pelanggan</p>
-                </div>
-                <div className="rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 shadow-sm">
-                  <p className="text-xl font-bold text-emerald-600">{transactionStats.thisMonthCount}</p>
-                  <p className="text-sm text-gray-500">Pesanan bulan ini</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="animate-fade-in-up reveal-on-scroll rounded-[28px] border border-white/70 bg-white/85 p-5 shadow-[0_30px_70px_-24px_rgba(15,23,42,0.25)] backdrop-blur-xl sm:p-8">
-              <div className="rounded-[24px] bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800 p-6 text-white shadow-lg">
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-100">
-                  Promo minggu ini
-                </p>
-                <h3 className="mt-3 text-2xl font-bold">{promos[0].title}</h3>
-                <p className="mt-3 text-sm leading-7 text-blue-50">
-                  {promos[0].description}
-                </p>
-                <div className="mt-6 flex flex-wrap items-center gap-3">
-                  <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-semibold">
-                    {promos[0].badge}
-                  </span>
-                  <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-semibold">
-                    Gratis packing
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 transition duration-300 hover:-translate-y-1 hover:shadow-md">
-                  <p className="text-sm font-semibold text-blue-700">Loyalitas</p>
-                  <p className="mt-2 text-xl font-bold text-gray-900">Tier Reguler, Silver, Gold</p>
-                </div>
-                <div className="rounded-2xl border border-red-100 bg-red-50 p-4 transition duration-300 hover:-translate-y-1 hover:shadow-md">
-                  <p className="text-sm font-semibold text-red-600">Omnichannel</p>
-                  <p className="mt-2 text-xl font-bold text-gray-900">Promo aktif dan campaign</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="produk" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <div className="animate-fade-in-up reveal-on-scroll">
-            <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-600">Produk unggulan</p>
-                <h3 className="mt-2 text-3xl font-black text-gray-900">Pilihan favorit pelanggan</h3>
-              </div>
-              <p className="max-w-xl text-sm leading-7 text-gray-600">
-                Koleksi terbaik untuk kebutuhan sekolah, belajar, dan aktivitas harian.
+              <p className="mx-auto mt-4 max-w-xl text-gray-500 text-sm">
+                Drag/geser galeri melingkar di bawah ini untuk melihat koleksi kategori buku dan alat tulis unggulan CendekiaBook.
               </p>
             </div>
-
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-              {featuredProducts.map((product, index) => (
-                <div
-                  key={product.name}
-                  className="group rounded-[24px] border border-gray-200 bg-white p-5 shadow-[0_16px_35px_-24px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-2 hover:shadow-[0_24px_50px_-20px_rgba(37,99,235,0.28)]"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${product.accent} text-2xl shadow-lg`}>
-                    {product.emoji}
-                  </div>
-                  <h4 className="mt-4 text-lg font-bold text-gray-900">{product.name}</h4>
-                  <p className="mt-2 text-sm leading-7 text-gray-600">{product.description}</p>
-                  <div className="mt-5 flex items-center justify-between">
-                    <span className="text-base font-semibold text-blue-700">{product.price}</span>
-                    <span className="text-sm font-semibold text-gray-500 transition duration-300 group-hover:text-blue-600">
-                      Lihat detail →
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <CoverflowCarousel items={catalogItems} />
           </div>
         </section>
 
-        <section id="loyalitas" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-gray-200 bg-white/85 p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.25)] sm:p-8 lg:p-10">
-            <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-600">Program loyalitas</p>
-                <h3 className="mt-2 text-3xl font-black text-gray-900">Nikmati manfaat sesuai tier Anda</h3>
-              </div>
-              <p className="max-w-xl text-sm leading-7 text-gray-600">
-                Setiap transaksi membantu Anda naik level dan menikmati keuntungan yang semakin menarik.
+        {/* ===== TENTANG ===== */}
+        <section id="tentang" className="max-w-6xl mx-auto px-4 sm:px-6 py-20 scroll-mt-16">
+          <div className="fade-up grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <span className="text-sm font-semibold uppercase tracking-widest text-blue-600">Tentang Kami</span>
+              <h2 className="text-3xl sm:text-4xl font-black mt-2 text-gray-900">Solusi <span className="text-gradient">Toko Buku Modern</span></h2>
+              <p className="text-gray-500 mt-4 leading-relaxed">
+                CendekiaBook hadir untuk membantu toko buku, alat tulis, dan bisnis pendidikan lainnya mengelola operasional dengan lebih efisien. Kami percaya bahwa teknologi dapat membantu UMKM berkembang lebih cepat.
               </p>
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-3">
-              {loyaltyTiers.map((tier, index) => (
-                <div
-                  key={tier.name}
-                  className={`rounded-[24px] border border-gray-200 bg-gradient-to-br ${tier.accent} p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg`}
-                  style={{ animationDelay: `${index * 120}ms` }}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <h4 className="text-xl font-bold text-gray-900">{tier.name}</h4>
-                    <span className={`rounded-full bg-white/70 px-3 py-1 text-xs font-semibold ${tier.text}`}>
-                      {tier.points}
-                    </span>
-                  </div>
-                  <ul className="mt-5 space-y-3 text-sm leading-7 text-gray-700">
-                    {tier.perks.map((perk) => (
-                      <li key={perk} className="flex items-start gap-2">
-                        <span className="mt-1 h-2.5 w-2.5 rounded-full bg-blue-600" />
-                        <span>{perk}</span>
-                      </li>
-                    ))}
-                  </ul>
+              <div className="grid grid-cols-2 gap-4 mt-6">
+                <div className="bg-blue-50 rounded-xl p-4 text-center">
+                  <div className="text-2xl font-black text-blue-600">50+</div>
+                  <div className="text-xs text-gray-500">Toko Terpercaya</div>
                 </div>
-              ))}
+                <div className="bg-indigo-50 rounded-xl p-4 text-center">
+                  <div className="text-2xl font-black text-indigo-600">4.8★</div>
+                  <div className="text-xs text-gray-500">Rating Pelanggan</div>
+                </div>
+              </div>
+            </div>
+            <div className="fade-up">
+              <img 
+                src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=600&h=400" 
+                alt="Toko Buku" 
+                className="rounded-2xl shadow-2xl w-full h-64 object-cover"
+              />
             </div>
           </div>
         </section>
 
-        <section id="promo" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <div className="animate-fade-in-up reveal-on-scroll">
-            <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-red-500">Promo aktif</p>
-                <h3 className="mt-2 text-3xl font-black text-gray-900">Campaign yang sedang berjalan</h3>
+        {/* ===== FAQ ===== */}
+        <section id="faq" className="max-w-4xl mx-auto px-4 sm:px-6 py-20 scroll-mt-16">
+          <div className="fade-up text-center mb-12">
+            <span className="text-sm font-semibold uppercase tracking-widest text-indigo-600">FAQ</span>
+            <h2 className="text-3xl sm:text-4xl font-black mt-2 text-gray-900">Pertanyaan yang Sering Diajukan</h2>
+            <p className="text-gray-500 mt-2">Temukan jawaban cepat untuk pertanyaan umum tentang CendekiaBook</p>
+          </div>
+          
+          <div className="fade-up bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+            {faqs.map((f, i) => (
+              <details key={i} className="border-b border-gray-100 last:border-0 group">
+                <summary className="flex justify-between items-center p-6 cursor-pointer hover:bg-gray-50/50 transition font-semibold text-gray-800">
+                  {f.q}
+                  <span className="text-blue-500 text-xl group-open:rotate-180 transition">▼</span>
+                </summary>
+                <div className="px-6 pb-6 text-gray-500 text-sm leading-relaxed">{f.a}</div>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        {/* ===== KONTAK ===== */}
+        <section id="kontak" className="max-w-6xl mx-auto px-4 sm:px-6 py-20 scroll-mt-16">
+          <div className="fade-up grid lg:grid-cols-2 gap-12 items-center bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-10">
+            <div>
+              <span className="text-sm font-semibold uppercase tracking-widest text-blue-600">Hubungi Kami</span>
+              <h2 className="text-3xl font-black mt-2 text-gray-900">Ada Pertanyaan? <span className="text-gradient">Kami Siap Membantu</span></h2>
+              <div className="mt-6 space-y-4">
+                <div className="flex items-center gap-4"><span className="text-2xl">📧</span><div><p className="font-semibold">Email</p><p className="text-sm text-gray-500">support@cendekiabook.com</p></div></div>
+                <div className="flex items-center gap-4"><span className="text-2xl">📱</span><div><p className="font-semibold">WhatsApp</p><p className="text-sm text-gray-500">+62 (123) 456-7890</p></div></div>
+                <div className="flex items-center gap-4"><span className="text-2xl">📍</span><div><p className="font-semibold">Alamat</p><p className="text-sm text-gray-500">Pekanbaru, Indonesia</p></div></div>
               </div>
-              <p className="max-w-xl text-sm leading-7 text-gray-600">
-                Promo yang menarik untuk mendukung kebutuhan belajar, aktivitas sekolah, dan belanja hemat.
+            </div>
+            <div className="bg-white rounded-2xl p-8 shadow-xl">
+              <h4 className="font-bold text-gray-800">Kirim Pesan</h4>
+              <input type="text" placeholder="Nama" className="w-full mt-3 p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-400" />
+              <input type="email" placeholder="Email" className="w-full mt-3 p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-400" />
+              <textarea placeholder="Pesan" rows="3" className="w-full mt-3 p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-400" />
+              <button className="w-full mt-4 py-3 rounded-full btn-gradient text-white font-medium shadow-lg shadow-blue-200 hover:shadow-xl transition">Kirim Pesan</button>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== CTA ===== */}
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
+          <div className="fade-up relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 p-12 text-center text-white shadow-2xl">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.1)_0%,_transparent_70%)]" />
+            <div className="relative z-10">
+              <h2 className="text-2xl sm:text-4xl font-black">Siap Mengelola Toko Buku Lebih Efisien?</h2>
+              <p className="text-white/80 mt-3 max-w-xl mx-auto text-lg">
+                Ratusan UMKM telah merasakan kemudahan mengelola bisnis dengan CendekiaBook.
               </p>
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-2">
-              {promos.map((promo, index) => (
-                <div
-                  key={promo.title}
-                  className="rounded-[24px] border border-gray-200 bg-white p-7 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.25)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_-20px_rgba(239,68,68,0.2)]"
-                  style={{ animationDelay: `${index * 120}ms` }}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <h4 className="text-xl font-bold text-gray-900">{promo.title}</h4>
-                    <span className="rounded-full bg-red-50 px-3 py-1 text-sm font-semibold text-red-600">
-                      {promo.badge}
-                    </span>
-                  </div>
-                  <p className="mt-4 text-sm leading-7 text-gray-600">{promo.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-gray-200 bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-white shadow-[0_24px_50px_-22px_rgba(37,99,235,0.45)] sm:p-8 lg:p-10">
-            <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-100">Testimoni pelanggan</p>
-                <h3 className="mt-2 text-3xl font-black">Apa yang mereka katakan</h3>
-              </div>
-              <p className="max-w-xl text-sm leading-7 text-blue-100">
-                Pengalaman nyata pelanggan yang merasa lebih mudah dan nyaman berbelanja bersama Cendekia.
-              </p>
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-3">
-              {testimonials.map((item, index) => (
-                <div
-                  key={item.name}
-                  className="rounded-[24px] border border-white/20 bg-white/10 p-6 backdrop-blur transition duration-300 hover:-translate-y-1 hover:bg-white/15"
-                  style={{ animationDelay: `${index * 120}ms` }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-lg font-bold">
-                      {item.name.charAt(0)}
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">{item.name}</h4>
-                      <p className="text-sm text-blue-100">{item.role}</p>
-                    </div>
-                  </div>
-                  <p className="mt-4 text-sm leading-7 text-blue-50">“{item.quote}”</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-gray-200 bg-white/90 p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.25)] sm:p-8 lg:p-10">
-            <div className="grid gap-6 md:grid-cols-3">
-              {whyChoose.map((item, index) => (
-                <div
-                  key={item.title}
-                  className="rounded-[24px] border border-gray-200 bg-gradient-to-br from-white to-slate-50 p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
-                  style={{ animationDelay: `${index * 120}ms` }}
-                >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-2xl shadow-sm">
-                    {item.icon}
-                  </div>
-                  <h4 className="mt-4 text-lg font-bold text-gray-900">{item.title}</h4>
-                  <p className="mt-2 text-sm leading-7 text-gray-600">{item.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-gray-200 bg-white p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.25)] sm:p-8 lg:p-10">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div className="max-w-2xl">
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-600">Gabung sekarang</p>
-                <h3 className="mt-2 text-3xl font-black text-gray-900">Jadi bagian dari komunitas Cendekia</h3>
-                <p className="mt-4 text-base leading-8 text-gray-600">
-                  Daftar sekarang dan nikmati akses promo, loyalitas, serta penawaran terbaik untuk kebutuhan belajar Anda.
-                </p>
-              </div>
-              <Link
-                to="/register"
-                className="rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-              >
-                Daftar Jadi Member
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section id="kontak" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <div className="animate-fade-in-up reveal-on-scroll rounded-[32px] border border-gray-200 bg-gradient-to-br from-white via-blue-50/60 to-red-50/60 p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.25)] sm:p-8 lg:p-10">
-            <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-600">Kontak</p>
-                <h3 className="mt-2 text-3xl font-black text-gray-900">Hubungi kami untuk kebutuhan buku, alat tulis, dan promo terbaru</h3>
-                <p className="mt-4 max-w-2xl text-base leading-8 text-gray-600">
-                  Kami siap membantu melalui WhatsApp, telepon, atau datang langsung ke toko. Semua informasi kontak kami disajikan agar pelanggan dapat terhubung dengan cepat.
-                </p>
-              </div>
-
-              <div className="rounded-[24px] border border-gray-200 bg-white/90 p-6 shadow-sm">
-                <div className="space-y-4 text-sm text-gray-700">
-                  <div className="flex items-start gap-3">
-                    <span className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-lg text-blue-700">📱</span>
-                    <div>
-                      <p className="font-semibold text-gray-900">WhatsApp</p>
-                      <a href="https://wa.me/6281234567890" target="_blank" rel="noreferrer" className="mt-1 inline-block text-blue-600 hover:text-blue-700">
-                        0812-3456-7890
-                      </a>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-lg text-red-600">📍</span>
-                    <div>
-                      <p className="font-semibold text-gray-900">Alamat</p>
-                      <p className="mt-1 leading-7">Jl. Paus No.73, Kelurahan Tangkerang Tengah, Pekanbaru, Riau</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-amber-50 text-lg text-amber-600">🕒</span>
-                    <div>
-                      <p className="font-semibold text-gray-900">Jam Operasional</p>
-                      <p className="mt-1 leading-7">Senin – Sabtu: 08.00 – 20.00</p>
-                      <p className="leading-7">Minggu: 09.00 – 17.00</p>
-                    </div>
-                  </div>
-                </div>
-
-                <a
-                  href="https://wa.me/6281234567890"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-6 inline-flex items-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 px-5 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-                >
-                  Hubungi via WhatsApp
-                </a>
+              <button onClick={() => navigate('/register')} className="mt-6 px-10 py-3.5 rounded-full bg-white text-blue-700 font-bold shadow-xl hover:scale-105 transition text-lg">
+                🚀 Mulai Gratis Sekarang
+              </button>
+              <div className="flex flex-wrap justify-center gap-6 mt-5 text-sm text-white/70">
+                <span>✓ Tidak perlu kartu kredit</span>
+                <span>✓ Setup 5 menit</span>
+                <span>✓ Akses penuh fitur dasar</span>
               </div>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-gray-200 bg-white/80">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 text-sm text-gray-600 sm:px-6 lg:grid-cols-3 lg:px-8">
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-blue-600 text-sm font-black text-white shadow-md">
-                C
+      {/* ============================================================
+      FOOTER
+      ============================================================ */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">C</div>
+                <span className="font-bold text-xl text-white">CendekiaBook</span>
               </div>
-              <div>
-                <h4 className="text-base font-bold text-gray-900">Cendekia</h4>
-                <p className="text-xs text-gray-500">Toko Buku & Alat Tulis</p>
+              <p className="text-gray-400 text-sm mt-3 leading-relaxed">
+                Platform CRM modern untuk mengelola pelanggan dan bisnis toko buku Anda dengan lebih efisien.
+              </p>
+              <div className="flex gap-3 mt-4">
+                <span className="text-gray-400 hover:text-white transition cursor-pointer text-xl">📘</span>
+                <span className="text-gray-400 hover:text-white transition cursor-pointer text-xl">📸</span>
+                <span className="text-gray-400 hover:text-white transition cursor-pointer text-xl">🐦</span>
+                <span className="text-gray-400 hover:text-white transition cursor-pointer text-xl">💼</span>
               </div>
             </div>
-            <p className="mt-3 leading-7">Toko buku dan alat tulis yang hadir untuk memudahkan kebutuhan belajar, kerja, dan aktivitas harian.</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <a href="#" aria-label="Instagram" className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:-translate-y-0.5 hover:border-blue-400 hover:text-blue-600">
-                <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
-                  <path d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm0 2a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H7Zm5 3.5A4.5 4.5 0 1 1 7.5 13 4.5 4.5 0 0 1 12 8.5Zm0 2A2.5 2.5 0 1 0 14.5 13 2.5 2.5 0 0 0 12 10.5Zm5.25-3.25a1 1 0 1 1-1 1 1 1 0 0 1 1-1Z" />
-                </svg>
-              </a>
-              <a href="#" aria-label="Facebook" className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:-translate-y-0.5 hover:border-blue-400 hover:text-blue-600">
-                <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
-                  <path d="M13 22v-8h2.7l.4-3H13V4.6c0-.9.2-1.5 1.5-1.5H16V.1c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 4v2.2H7.5v3h2.4v8h3.1Z" />
-                </svg>
-              </a>
-              <a href="#" aria-label="TikTok" className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:-translate-y-0.5 hover:border-blue-400 hover:text-blue-600">
-                <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
-                  <path d="M14.5 3h2.1a4.8 4.8 0 0 0 4.8 4.8V10a6.6 6.6 0 0 1-4.8-1.7v6.9a5.6 5.6 0 1 1-5.6-5.6c.3 0 .5 0 .8.1v2.7a3 3 0 1 0 1.8 2.8V3Z" />
-                </svg>
-              </a>
+
+            <div>
+              <h4 className="font-bold text-white">Produk</h4>
+              <ul className="mt-3 space-y-2 text-sm text-gray-400">
+                <li className="hover:text-white transition cursor-pointer">Dashboard</li>
+                <li className="hover:text-white transition cursor-pointer">Manajemen Pelanggan</li>
+                <li className="hover:text-white transition cursor-pointer">Manajemen Produk</li>
+                <li className="hover:text-white transition cursor-pointer">Program Loyalitas</li>
+              </ul>
             </div>
+
+            <div>
+              <h4 className="font-bold text-white">Perusahaan</h4>
+              <ul className="mt-3 space-y-2 text-sm text-gray-400">
+                <li className="hover:text-white transition cursor-pointer">Tentang Kami</li>
+                <li className="hover:text-white transition cursor-pointer">Karir</li>
+                <li className="hover:text-white transition cursor-pointer">Kebijakan Privasi</li>
+                <li className="hover:text-white transition cursor-pointer">Syarat & Ketentuan</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold text-white">Kontak</h4>
+              <div className="mt-3 space-y-2 text-sm text-gray-400">
+                <p>📍 Pekanbaru, Indonesia</p>
+                <p>📧 support@cendekiabook.com</p>
+                <p>📱 +62 (123) 456-7890</p>
+                <p className="text-xs text-gray-500">🕐 Senin - Sabtu: 08:00 - 20:00</p>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <button className="px-4 py-2 rounded-full border border-gray-700 text-sm text-gray-400 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition">
+                  💬 WhatsApp
+                </button>
+                <button className="px-4 py-2 rounded-full border border-gray-700 text-sm text-gray-400 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition">
+                  📧 Email
+                </button>
+              </div>
+            </div>
+
           </div>
-          <div>
-            <h4 className="text-base font-bold text-gray-900">Alamat</h4>
-            <p className="mt-3 leading-7">Jl. Paus No.73, Pekanbaru</p>
-            <p className="leading-7">Telp. 0812-3456-7890</p>
+
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-500">
+            © 2026 CendekiaBook. All rights reserved. Made with ❤️ in Pekanbaru
           </div>
-          <div>
-            <h4 className="text-base font-bold text-gray-900">Jam Operasional</h4>
-            <p className="mt-3 leading-7">Senin – Sabtu: 08.00 – 20.00</p>
-            <p className="leading-7">Minggu: 09.00 – 17.00</p>
-          </div>
-        </div>
-        <div className="border-t border-gray-200 px-4 py-4 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
-          © 2025 Toko Buku Cendekia. All rights reserved.
         </div>
       </footer>
     </div>

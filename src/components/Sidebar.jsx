@@ -15,16 +15,17 @@ import {
 } from 'react-icons/fa';
 
 const menuItems = [
-  { path: '/', name: 'Dashboard', icon: FaTachometerAlt },
+  { path: '/dashboard', name: 'Dashboard', icon: FaTachometerAlt },
   { path: '/customers', name: 'Pelanggan', icon: FaUsers },
   { path: '/transactions', name: 'Transaksi', icon: FaShoppingCart },
   { path: '/stock', name: 'Stok', icon: FaBox },
+  { path: '/products', name: 'Products', icon: FaBox },
   { path: '/preorder', name: 'Pre-Order', icon: FaCalendarAlt },
   { path: '/loyalty', name: 'Loyalitas', icon: FaTrophy },
-  { path: '/segmentation', name: 'Segmentasi', icon: FaChartPie },
+  // { path: '/segmentation', name: 'Segmentasi', icon: FaChartPie },
   { path: '/feedback', name: 'Feedback', icon: FaStar },
   { path: '/reports', name: 'Laporan', icon: FaFileAlt },
-  { path: '/omnichannel', name: 'Omnichannel', icon: FaStore },
+  // { path: '/omnichannel', name: 'Omnichannel', icon: FaStore },
 ];
 
 // Menu khusus admin

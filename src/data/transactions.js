@@ -1,4 +1,6 @@
+// src/data/transactions.js
 // Data Transaksi Toko Buku Cendekia - 30 data
+
 const transactionsData = [
   { id: 1, customerId: 1, customerName: "Budi Santoso", items: [{ productId: 2, productName: "Buku Paket Matematika Kelas 6 SD", quantity: 2, price: 85000, subtotal: 170000 }], total: 170000, status: "selesai", paymentMethod: "qris", source: "offline", orderDate: "2025-03-20", pickupDate: "2025-03-20", trackingHistory: [{ status: "pesanan_diterima", timestamp: "2025-03-20 08:00:00" }, { status: "sedang_diproses", timestamp: "2025-03-20 08:30:00" }, { status: "siap_diambil", timestamp: "2025-03-20 10:00:00" }, { status: "selesai", timestamp: "2025-03-20 14:00:00" }] },
   { id: 2, customerId: 2, customerName: "Aisyah Putri", items: [{ productId: 3, productName: "Al-Qur'an Terjemah Per Kata", quantity: 1, price: 150000, subtotal: 150000 }], total: 150000, status: "diproses", paymentMethod: "cash", source: "whatsapp", orderDate: "2025-04-01", pickupDate: null, trackingHistory: [{ status: "pesanan_diterima", timestamp: "2025-04-01 09:15:00" }, { status: "sedang_diproses", timestamp: "2025-04-01 10:00:00" }] },
@@ -83,6 +85,57 @@ export const updateTransactionStatus = (id, status) => {
   return null;
 };
 
+// ========== UPDATE TRANSAKSI (EDIT) ==========
+export const updateTransaction = (id, updatedData) => {
+  const all = getTransactions();
+  const index = all.findIndex(t => t.id === id);
+  if (index !== -1) {
+    all[index] = { 
+      ...all[index], 
+      ...updatedData,
+      ...(updatedData.status === 'selesai' && !all[index].pickupDate ? { 
+        pickupDate: new Date().toISOString().split('T')[0] 
+      } : {})
+    };
+    saveTransactions(all);
+    return all[index];
+  }
+  return null;
+};
+
+// ========== DELETE TRANSAKSI ==========
+export const deleteTransaction = (id) => {
+  const all = getTransactions();
+  const filtered = all.filter(t => t.id !== id);
+  if (filtered.length !== all.length) {
+    saveTransactions(filtered);
+    return true;
+  }
+  return false;
+};
+
+// ========== BATAL TRANSAKSI ==========
+export const cancelTransaction = (id) => {
+  const all = getTransactions();
+  const index = all.findIndex(t => t.id === id);
+  if (index !== -1) {
+    all[index].status = 'dibatalkan';
+    all[index].trackingHistory.push({ 
+      status: 'dibatalkan', 
+      timestamp: new Date().toLocaleString() 
+    });
+    saveTransactions(all);
+    return all[index];
+  }
+  return null;
+};
+
+// ========== RESET DATA ==========
+export const resetTransactions = () => {
+  saveTransactions([...transactionsData]);
+  return [...transactionsData];
+};
+
 export const getTransactionStats = () => {
   const all = getTransactions();
   const now = new Date();
@@ -103,7 +156,8 @@ export const getTransactionStats = () => {
       pesanan_diterima: all.filter(t => t.status === 'pesanan_diterima').length,
       diproses: all.filter(t => t.status === 'diproses').length,
       siap_diambil: all.filter(t => t.status === 'siap_diambil').length,
-      selesai: all.filter(t => t.status === 'selesai').length
+      selesai: all.filter(t => t.status === 'selesai').length,
+      dibatalkan: all.filter(t => t.status === 'dibatalkan').length
     },
     bySource: {
       offline: all.filter(t => t.source === 'offline').length,
