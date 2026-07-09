@@ -8,8 +8,6 @@ import {
   FaEye,
   FaEyeSlash,
   FaBookOpen,
-  FaUserCog,
-  FaUser,
 } from "react-icons/fa";
 
 import { BsFillExclamationDiamondFill } from "react-icons/bs";
@@ -19,38 +17,65 @@ import { MdAdminPanelSettings } from "react-icons/md";
 // ============================================
 // KONFIGURASI SUPABASE
 // ============================================
-const API_URL = "https://ajzhvqiottyeodhhtyqb.supabase.co/rest/v1/users"
-const API_KEY = "sb_publishable_g_qv9oZdohhB98Z33_AWuw_9cT4MS-E"
+const API_URL = "https://ajzhvqiottyeodhhtyqb.supabase.co/rest/v1/users";
+const API_KEY = "sb_publishable_g_qv9oZdohhB98Z33_AWuw_9cT4MS-E";
 
 const headers = {
   apikey: API_KEY,
   Authorization: `Bearer ${API_KEY}`,
   "Content-Type": "application/json",
-}
+};
 
 // SLIDESHOW DATA DENGAN GAMBAR
 const slides = [
   {
     image: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800&h=600&fit=crop",
     title: "Kelola Buku dengan Mudah",
-    description: "Atur stok, kategori, dan informasi buku secara efisien"
+    description: "Atur stok, kategori, dan informasi buku secara efisien",
   },
   {
     image: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=800&h=600&fit=crop",
     title: "Manajemen Pelanggan",
-    description: "Catat dan kelola data pelanggan dengan sistem terintegrasi"
+    description: "Catat dan kelola data pelanggan dengan sistem terintegrasi",
   },
   {
     image: "https://images.unsplash.com/photo-1434626881859-194d67b2b86f?w=800&h=600&fit=crop",
     title: "Analisis Penjualan",
-    description: "Pantau performa penjualan dan buat keputusan bisnis yang tepat"
+    description: "Pantau performa penjualan dan buat keputusan bisnis yang tepat",
   },
   {
     image: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&h=600&fit=crop",
     title: "Toko Buku Cendekia",
-    description: "Solusi lengkap untuk manajemen toko buku modern"
-  }
+    description: "Solusi lengkap untuk manajemen toko buku modern",
+  },
 ];
+
+// ============================================
+// AKUN DEMO - HANYA ADMIN
+// ============================================
+const demoAccounts = [
+  {
+    role: "admin",
+    label: "User / Admin",
+    badge: "Admin",
+    email: "admincendekia@gmail.com",
+    password: "admincendekia",
+    icon: MdAdminPanelSettings,
+    theme: {
+      wrapper: "from-blue-50/80 to-indigo-50/80 border-blue-100/50",
+      iconBg: "from-blue-600 to-indigo-600",
+      badgeBg: "bg-blue-100 text-blue-700",
+      button: "bg-blue-600 hover:bg-blue-700",
+    },
+  },
+];
+
+// Tentukan tujuan redirect berdasarkan role.
+// Kalau kolom role belum ada / kosong, default ke /dashboard.
+const getRedirectPath = (role) => {
+  if (role === "pelanggan") return "/pelanggan";
+  return "/dashboard";
+};
 
 export default function Login() {
   const navigate = useNavigate();
@@ -101,18 +126,18 @@ export default function Login() {
         `${API_URL}?email=ilike.${dataForm.email}&password=eq.${dataForm.password}`,
         { headers }
       );
-      
+
       if (response.data.length > 0) {
         const userData = response.data[0];
         localStorage.setItem("user", JSON.stringify(userData));
-        navigate("/dashboard");
+        navigate(getRedirectPath(userData.role));
       } else {
         try {
           const emailCheck = await axios.get(
             `${API_URL}?email=ilike.${dataForm.email}`,
             { headers }
           );
-          
+
           if (emailCheck.data.length > 0) {
             setError("❌ Password salah!");
           } else {
@@ -138,36 +163,27 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      {/* Container utama */}
       <div className="w-full max-w-7xl h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
-        
-        {/* LEFT SIDE - SLIDESHOW (50%) */}
+
+        {/* LEFT SIDE - SLIDESHOW */}
         <div className="w-full md:w-1/2 relative overflow-hidden">
-          {/* Background Image dengan overlay */}
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
-            style={{ 
+            style={{
               backgroundImage: `url(${slides[currentSlide].image})`,
-              transform: 'scale(1.05)'
+              transform: "scale(1.05)",
             }}
           />
-          
-          {/* Overlay Gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/50" />
-          
-          {/* Decorative blur */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl -mr-48 -mt-48" />
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl -ml-48 -mb-48" />
 
-          {/* Content */}
           <div className="relative z-10 h-full flex flex-col justify-center items-center text-white p-12">
-            {/* Brand */}
             <div className="absolute top-8 left-8 flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
               <FaBookOpen className="text-2xl text-blue-300" />
               <span className="text-lg font-bold tracking-wide">Cendekia</span>
             </div>
 
-            {/* Slide Content */}
             <div className="text-center max-w-lg">
               <div className="transition-all duration-500">
                 <h3 className="text-3xl md:text-4xl font-bold mb-4 drop-shadow-lg">
@@ -178,20 +194,18 @@ export default function Login() {
                 </p>
               </div>
 
-              {/* Slide Number */}
               <div className="mt-8 text-sm text-white/60">
                 {currentSlide + 1} / {slides.length}
               </div>
 
-              {/* Dots */}
               <div className="flex justify-center gap-3 mt-4">
                 {slides.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
-                      currentSlide === index 
-                        ? "w-10 bg-white shadow-lg" 
+                      currentSlide === index
+                        ? "w-10 bg-white shadow-lg"
                         : "w-2 bg-white/40 hover:bg-white/60"
                     }`}
                   />
@@ -201,31 +215,26 @@ export default function Login() {
           </div>
         </div>
 
-        {/* RIGHT SIDE - LOGIN (50%) */}
+        {/* RIGHT SIDE - LOGIN */}
         <div className="w-full md:w-1/2 p-8 md:p-12 bg-gradient-to-br from-white to-gray-50/80 flex items-center justify-center overflow-y-auto">
           <div className="w-full max-w-lg mx-auto">
-            {/* Header */}
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-1 h-8 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full" />
-                <h2 className="text-3xl font-bold text-gray-800">
-                  Selamat Datang
-                </h2>
+                <h2 className="text-3xl font-bold text-gray-800">Selamat Datang</h2>
               </div>
               <p className="text-gray-500 text-sm ml-4">
                 Masuk ke dashboard CRM Toko Buku Cendekia
               </p>
             </div>
 
-            {/* Error */}
             {error && (
-              <div className="bg-red-50/80 backdrop-blur-sm border border-red-200 mb-4 p-4 text-sm text-red-700 rounded-xl flex items-center gap-2 animate-shake">
+              <div className="bg-red-50/80 backdrop-blur-sm border border-red-200 mb-4 p-4 text-sm text-red-700 rounded-xl flex items-center gap-2">
                 <BsFillExclamationDiamondFill className="text-red-500 flex-shrink-0 text-lg" />
                 <span>{error}</span>
               </div>
             )}
 
-            {/* Loading */}
             {loading && (
               <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200 mb-4 p-4 text-sm text-blue-700 rounded-xl flex items-center gap-2">
                 <ImSpinner2 className="animate-spin text-lg" />
@@ -233,9 +242,7 @@ export default function Login() {
               </div>
             )}
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Email */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                   Email Address
@@ -253,7 +260,6 @@ export default function Login() {
                 </div>
               </div>
 
-              {/* Password */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                   Password
@@ -278,7 +284,6 @@ export default function Login() {
                 </div>
               </div>
 
-              {/* Forgot Password & Remember */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <input
@@ -298,7 +303,6 @@ export default function Login() {
                 </Link>
               </div>
 
-              {/* Submit */}
               <button
                 type="submit"
                 disabled={loading}
@@ -315,7 +319,6 @@ export default function Login() {
               </button>
             </form>
 
-            {/* Register */}
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-500">
                 Belum punya akun?{" "}
@@ -328,7 +331,6 @@ export default function Login() {
               </p>
             </div>
 
-            {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
@@ -338,95 +340,52 @@ export default function Login() {
               </div>
             </div>
 
-            {/* DEMO ACCOUNTS - 2 ROLE */}
+            {/* DEMO ACCOUNTS - HANYA ADMIN */}
             <div className="space-y-3">
-              {/* Admin Account */}
-              <div className="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm rounded-xl p-4 border border-blue-100/50 hover:shadow-md transition-all group cursor-pointer" 
-                   onClick={() => fillDemoAccount("admincendekia@gmail.com", "admincendekia")}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center text-white shadow-md">
-                      <MdAdminPanelSettings className="text-xl" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800 flex items-center gap-2">
-                        Admin Store Owner
-                        <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-normal">
-                          Owner
-                        </span>
-                      </p>
-                      <p className="text-xs text-gray-500 font-mono">
-                        admincendekia@gmail.com
-                      </p>
-                      <p className="text-xs text-gray-400 font-mono">
-                        pw: admincendekia
-                      </p>
+              {demoAccounts.map((acc) => {
+                const Icon = acc.icon;
+                return (
+                  <div
+                    key={acc.role}
+                    className={`bg-gradient-to-r ${acc.theme.wrapper} backdrop-blur-sm rounded-xl p-4 border hover:shadow-md transition-all group cursor-pointer`}
+                    onClick={() => fillDemoAccount(acc.email, acc.password)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-10 h-10 bg-gradient-to-br ${acc.theme.iconBg} rounded-lg flex items-center justify-center text-white shadow-md`}
+                        >
+                          <Icon className="text-xl" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                            {acc.label}
+                            <span className={`text-[10px] ${acc.theme.badgeBg} px-2 py-0.5 rounded-full font-normal`}>
+                              {acc.badge}
+                            </span>
+                          </p>
+                          <p className="text-xs text-gray-500 font-mono">{acc.email}</p>
+                          <p className="text-xs text-gray-400 font-mono">pw: {acc.password}</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          fillDemoAccount(acc.email, acc.password);
+                        }}
+                        className={`text-xs ${acc.theme.button} text-white px-3 py-1.5 rounded-lg font-medium transition-all hover:shadow-md`}
+                      >
+                        Gunakan
+                      </button>
                     </div>
                   </div>
-                  <button 
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      fillDemoAccount("admincendekia@gmail.com", "admincendekia");
-                    }}
-                    className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-medium transition-all hover:shadow-md"
-                  >
-                    Gunakan
-                  </button>
-                </div>
-              </div>
-
-              {/* Customer Account */}
-              <div className="bg-gradient-to-r from-green-50/80 to-emerald-50/80 backdrop-blur-sm rounded-xl p-4 border border-green-100/50 hover:shadow-md transition-all group cursor-pointer"
-                   onClick={() => fillDemoAccount("pelanggancendekia@gmail.com", "pelanggan123")}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-emerald-600 rounded-lg flex items-center justify-center text-white shadow-md">
-                      <FaUser className="text-xl" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800 flex items-center gap-2">
-                        Pelanggan Setia
-                        <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-normal">
-                          Customer
-                        </span>
-                      </p>
-                      <p className="text-xs text-gray-500 font-mono">
-                        pelanggancendekia@gmail.com
-                      </p>
-                      <p className="text-xs text-gray-400 font-mono">
-                        pw: pelanggan123
-                      </p>
-                    </div>
-                  </div>
-                  <button 
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      fillDemoAccount("pelanggancendekia@gmail.com", "pelanggan123");
-                    }}
-                    className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg font-medium transition-all hover:shadow-md"
-                  >
-                    Gunakan
-                  </button>
-                </div>
-              </div>
+                );
+              })}
             </div>
           </div>
         </div>
       </div>
-
-      {/* Animation Keyframes */}
-      <style jsx>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-8px); }
-          75% { transform: translateX(8px); }
-        }
-        .animate-shake {
-          animation: shake 0.5s ease-in-out;
-        }
-      `}</style>
     </div>
   );
 }

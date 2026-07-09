@@ -23,11 +23,23 @@ import {
   FaComment,
   FaHistory,
   FaUsers,
-  FaTrophy
+  FaTrophy,
+  FaEdit,
+  FaTrash,
+  FaPlus,
+  FaSave,
+  FaEye
 } from 'react-icons/fa';
 import { FiMessageCircle, FiStar } from 'react-icons/fi';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { getFeedbacks, updateFeedbackStatus, getFeedbackStats } from '../data/feedbacks';
+import { 
+  getFeedbacks, 
+  updateFeedbackStatus, 
+  getFeedbackStats,
+  deleteFeedback,
+  addFeedback,
+  updateFeedback
+} from '../data/feedbacks';
 
 const FeedbackPage = () => {
   const [feedbacks, setFeedbacks] = useState([]);
@@ -40,6 +52,22 @@ const FeedbackPage = () => {
   const [replyDialogOpen, setReplyDialogOpen] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  
+  // CRUD Modal states
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    customerName: '',
+    rating: 5,
+    comment: '',
+    status: 'pending'
+  });
+  const [formError, setFormError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState('');
+  const [feedbackType, setFeedbackType] = useState('success');
   
   // Broadcast State
   const [broadcastTitle, setBroadcastTitle] = useState('');
@@ -98,6 +126,117 @@ const FeedbackPage = () => {
     setCurrentPage(1);
   };
 
+  // ============================================
+  // CRUD FUNCTIONS
+  // ============================================
+
+  const handleAddSubmit = () => {
+    if (!formData.customerName.trim()) {
+      setFormError('Nama pelanggan wajib diisi.');
+      return;
+    }
+    if (!formData.comment.trim()) {
+      setFormError('Komentar wajib diisi.');
+      return;
+    }
+
+    setSaving(true);
+    setFormError('');
+
+    const newFeedback = {
+      id: `FB-${String(feedbacks.length + 1).padStart(3, '0')}`,
+      customerName: formData.customerName.trim(),
+      rating: Number(formData.rating) || 5,
+      comment: formData.comment.trim(),
+      status: formData.status || 'pending',
+      createdAt: new Date().toISOString(),
+      reply: null
+    };
+
+    try {
+      addFeedback(newFeedback);
+      loadFeedbacks();
+      setIsAddModalOpen(false);
+      resetForm();
+      showFeedback('Feedback berhasil ditambahkan.', 'success');
+    } catch (err) {
+      setFormError('Gagal menambah feedback. Coba lagi.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleViewDetail = (feedback) => {
+    setSelectedFeedback(feedback);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleEditClick = (feedback) => {
+    setSelectedFeedback(feedback);
+    setFormData({
+      customerName: feedback.customerName,
+      rating: feedback.rating,
+      comment: feedback.comment,
+      status: feedback.status
+    });
+    setFormError('');
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = () => {
+    if (!formData.customerName.trim()) {
+      setFormError('Nama pelanggan wajib diisi.');
+      return;
+    }
+    if (!formData.comment.trim()) {
+      setFormError('Komentar wajib diisi.');
+      return;
+    }
+
+    setSaving(true);
+    setFormError('');
+
+    const updatedFeedback = {
+      ...selectedFeedback,
+      customerName: formData.customerName.trim(),
+      rating: Number(formData.rating) || 5,
+      comment: formData.comment.trim(),
+      status: formData.status
+    };
+
+    try {
+      updateFeedback(selectedFeedback.id, updatedFeedback);
+      loadFeedbacks();
+      setIsEditModalOpen(false);
+      resetForm();
+      showFeedback('Feedback berhasil diperbarui.', 'success');
+    } catch (err) {
+      setFormError('Gagal mengupdate feedback. Coba lagi.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteClick = (feedback) => {
+    setSelectedFeedback(feedback);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    setSaving(true);
+    try {
+      deleteFeedback(selectedFeedback.id);
+      loadFeedbacks();
+      setIsDeleteModalOpen(false);
+      setSelectedFeedback(null);
+      showFeedback('Feedback berhasil dihapus.', 'success');
+    } catch (err) {
+      showFeedback('Gagal menghapus feedback. Coba lagi.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleResolve = (id) => {
     const feedback = feedbacks.find(f => f.id === id);
     setSelectedFeedback(feedback);
@@ -112,7 +251,33 @@ const FeedbackPage = () => {
       setSelectedFeedback(null);
       setReplyText('');
       loadFeedbacks();
+      showFeedback('Balasan berhasil dikirim.', 'success');
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      customerName: '',
+      rating: 5,
+      comment: '',
+      status: 'pending'
+    });
+    setFormError('');
+    setSelectedFeedback(null);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const showFeedback = (message, type = 'success') => {
+    setFeedback(message);
+    setFeedbackType(type);
+    setTimeout(() => setFeedback(''), 5000);
   };
 
   const handleBroadcastSend = () => {
@@ -133,7 +298,7 @@ const FeedbackPage = () => {
       setBroadcastLogs([newLog, ...broadcastLogs]);
       setBroadcastTitle('');
       setBroadcastMessage('');
-      alert('✅ Broadcast berhasil dikirim ke semua pelanggan!');
+      showFeedback('✅ Broadcast berhasil dikirim ke semua pelanggan!', 'success');
     }
   };
 
@@ -202,7 +367,6 @@ const FeedbackPage = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedFeedbacks = filteredFeedbacks.slice(startIndex, startIndex + itemsPerPage);
 
-  // Rating distribution
   const ratingDistribution = {
     5: feedbacks.filter(f => f.rating === 5).length,
     4: feedbacks.filter(f => f.rating === 4).length,
@@ -219,18 +383,43 @@ const FeedbackPage = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-[#131523] flex items-center gap-3">
-            <FiMessageCircle className="w-7 h-7 text-[#1A5CFF]" />
-            Feedback & Broadcast Center
-          </h1>
-          <p className="text-[#7E84A3] mt-1">
-            Ukur tingkat kepuasan pelanggan secara real-time dan kirim pesan promosi.
-          </p>
+          <div className="flex justify-between items-start flex-wrap gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-[#131523] flex items-center gap-3">
+                <FiMessageCircle className="w-7 h-7 text-[#1A5CFF]" />
+                Feedback & Broadcast Center
+              </h1>
+              <p className="text-[#7E84A3] mt-1">
+                Ukur tingkat kepuasan pelanggan secara real-time dan kirim pesan promosi.
+              </p>
+              <p className="text-sm text-[#7E84A3] mt-1">Total feedback: {feedbacks.length}</p>
+            </div>
+            <button 
+              onClick={() => {
+                resetForm();
+                setIsAddModalOpen(true);
+              }}
+              className="px-5 py-2.5 bg-[#1A5CFF] hover:bg-[#1A5CFF]/90 text-white rounded-xl flex items-center gap-2 shadow-lg shadow-blue-500/30 transition-all hover:scale-105"
+            >
+              <FaPlus size={16} />
+              Tambah Feedback
+            </button>
+          </div>
         </div>
+
+        {feedback && (
+          <div className={`mb-4 rounded-xl border px-4 py-3 text-sm ${
+            feedbackType === 'success' 
+              ? 'border-green-200 bg-green-50 text-green-700' 
+              : 'border-red-200 bg-red-50 text-red-700'
+          }`}>
+            {feedback}
+          </div>
+        )}
 
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - CSAT & Rating Distribution */}
+          {/* Left Column */}
           <div className="lg:col-span-1 space-y-6">
             {/* CSAT Score Card */}
             <div className="bg-white rounded-xl shadow-sm border border-[#D7DBEC] p-6 text-center">
@@ -456,15 +645,46 @@ const FeedbackPage = () => {
                       )}
                     </div>
                     
-                    <div className="flex items-center gap-3 ml-4">
+                    {/* ACTION BUTTONS - DITAMPILKAN JELAS */}
+                    <div className="flex items-center gap-2 ml-4">
+                      {/* Tombol Detail */}
+                      <button
+                        onClick={() => handleViewDetail(feedback)}
+                        className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
+                        title="Detail"
+                      >
+                        <FaEye size={14} />
+                      </button>
+                      
+                      {/* Tombol Edit */}
+                      <button
+                        onClick={() => handleEditClick(feedback)}
+                        className="p-2 bg-yellow-50 hover:bg-yellow-100 text-yellow-600 rounded-lg transition-colors"
+                        title="Edit"
+                      >
+                        <FaEdit size={14} />
+                      </button>
+                      
+                      {/* Tombol Hapus */}
+                      <button
+                        onClick={() => handleDeleteClick(feedback)}
+                        className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
+                        title="Hapus"
+                      >
+                        <FaTrash size={14} />
+                      </button>
+                      
+                      {/* Status Badge */}
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${statusConfig.bg} ${statusConfig.color}`}>
                         <StatusIcon size={10} />
                         {statusConfig.label}
                       </span>
+                      
+                      {/* Tombol Balas */}
                       {feedback.status !== 'resolved' && (
                         <button
                           onClick={() => handleResolve(feedback.id)}
-                          className="p-1.5 text-[#1A5CFF] hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg transition-colors"
                           title="Balas"
                         >
                           <FaReply size={14} />
@@ -598,6 +818,367 @@ const FeedbackPage = () => {
                   >
                     <FaReply size={12} />
                     Kirim Balasan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ADD MODAL */}
+        {isAddModalOpen && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-[#E1E5F0] px-6 py-4 flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-[#131523] flex items-center gap-2">
+                  <FaPlus className="w-5 h-5 text-[#1A5CFF]" />
+                  Tambah Feedback
+                </h2>
+                <button
+                  onClick={() => {
+                    setIsAddModalOpen(false);
+                    resetForm();
+                  }}
+                  className="p-2 hover:bg-[#F5F6FA] rounded-lg text-2xl"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                {formError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+                    {formError}
+                  </div>
+                )}
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[#131523] mb-1">Nama Pelanggan *</label>
+                    <input
+                      type="text"
+                      name="customerName"
+                      value={formData.customerName}
+                      onChange={handleInputChange}
+                      placeholder="Contoh: Budi Santoso"
+                      className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#131523] mb-1">Rating</label>
+                    <select
+                      name="rating"
+                      value={formData.rating}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                    >
+                      <option value={5}>⭐⭐⭐⭐⭐ - Sangat Puas</option>
+                      <option value={4}>⭐⭐⭐⭐ - Puas</option>
+                      <option value={3}>⭐⭐⭐ - Cukup</option>
+                      <option value={2}>⭐⭐ - Kurang Puas</option>
+                      <option value={1}>⭐ - Tidak Puas</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#131523] mb-1">Komentar *</label>
+                    <textarea
+                      name="comment"
+                      value={formData.comment}
+                      onChange={handleInputChange}
+                      placeholder="Tulis komentar feedback..."
+                      className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none resize-none min-h-[100px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#131523] mb-1">Status</label>
+                    <select
+                      name="status"
+                      value={formData.status}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                    >
+                      <option value="pending">Menunggu</option>
+                      <option value="in_progress">Diproses</option>
+                      <option value="resolved">Selesai</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3 pt-4 border-t border-[#E1E5F0]">
+                  <button
+                    onClick={() => {
+                      setIsAddModalOpen(false);
+                      resetForm();
+                    }}
+                    className="px-4 py-2 border border-[#E1E5F0] rounded-lg hover:bg-[#F5F6FA] flex items-center gap-2"
+                  >
+                    <FaTimes className="w-4 h-4" />
+                    Batal
+                  </button>
+                  <button
+                    onClick={handleAddSubmit}
+                    disabled={saving}
+                    className="px-4 py-2 bg-[#1A5CFF] hover:bg-[#1A5CFF]/90 text-white rounded-lg flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <FaSave className="w-4 h-4" />
+                    {saving ? 'Menyimpan...' : 'Simpan Feedback'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* EDIT MODAL */}
+        {isEditModalOpen && selectedFeedback && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-[#E1E5F0] px-6 py-4 flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-[#131523] flex items-center gap-2">
+                  <FaEdit className="w-5 h-5 text-yellow-600" />
+                  Edit Feedback
+                </h2>
+                <button
+                  onClick={() => {
+                    setIsEditModalOpen(false);
+                    resetForm();
+                  }}
+                  className="p-2 hover:bg-[#F5F6FA] rounded-lg text-2xl"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                {formError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+                    {formError}
+                  </div>
+                )}
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[#131523] mb-1">ID Feedback</label>
+                    <input
+                      type="text"
+                      value={selectedFeedback.id}
+                      disabled
+                      className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg bg-gray-50 text-gray-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#131523] mb-1">Nama Pelanggan *</label>
+                    <input
+                      type="text"
+                      name="customerName"
+                      value={formData.customerName}
+                      onChange={handleInputChange}
+                      placeholder="Contoh: Budi Santoso"
+                      className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#131523] mb-1">Rating</label>
+                    <select
+                      name="rating"
+                      value={formData.rating}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                    >
+                      <option value={5}>⭐⭐⭐⭐⭐ - Sangat Puas</option>
+                      <option value={4}>⭐⭐⭐⭐ - Puas</option>
+                      <option value={3}>⭐⭐⭐ - Cukup</option>
+                      <option value={2}>⭐⭐ - Kurang Puas</option>
+                      <option value={1}>⭐ - Tidak Puas</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#131523] mb-1">Komentar *</label>
+                    <textarea
+                      name="comment"
+                      value={formData.comment}
+                      onChange={handleInputChange}
+                      placeholder="Tulis komentar feedback..."
+                      className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none resize-none min-h-[100px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#131523] mb-1">Status</label>
+                    <select
+                      name="status"
+                      value={formData.status}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                    >
+                      <option value="pending">Menunggu</option>
+                      <option value="in_progress">Diproses</option>
+                      <option value="resolved">Selesai</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3 pt-4 border-t border-[#E1E5F0]">
+                  <button
+                    onClick={() => {
+                      setIsEditModalOpen(false);
+                      resetForm();
+                    }}
+                    className="px-4 py-2 border border-[#E1E5F0] rounded-lg hover:bg-[#F5F6FA] flex items-center gap-2"
+                  >
+                    <FaTimes className="w-4 h-4" />
+                    Batal
+                  </button>
+                  <button
+                    onClick={handleEditSubmit}
+                    disabled={saving}
+                    className="px-4 py-2 bg-[#1A5CFF] hover:bg-[#1A5CFF]/90 text-white rounded-lg flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <FaSave className="w-4 h-4" />
+                    {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* DETAIL MODAL */}
+        {isDetailModalOpen && selectedFeedback && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-[#E1E5F0] px-6 py-4 flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-[#131523] flex items-center gap-2">
+                  <FaEye className="w-5 h-5 text-[#1A5CFF]" />
+                  Detail Feedback
+                </h2>
+                <button
+                  onClick={() => {
+                    setIsDetailModalOpen(false);
+                    setSelectedFeedback(null);
+                  }}
+                  className="p-2 hover:bg-[#F5F6FA] rounded-lg text-2xl"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-[#7E84A3] uppercase">ID Feedback</p>
+                      <p className="font-bold text-[#1A5CFF]">{selectedFeedback.id}</p>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusConfig(selectedFeedback.status).bg} ${getStatusConfig(selectedFeedback.status).color}`}>
+                      <span className="flex items-center gap-1">
+                        {getStatusConfig(selectedFeedback.status).label}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 mt-3">
+                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#131523] font-bold text-lg">
+                      {selectedFeedback.customerName?.charAt(0) || '?'}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-[#131523]">{selectedFeedback.customerName}</h3>
+                      <div className="flex text-yellow-400 text-sm">
+                        {renderStars(selectedFeedback.rating)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#F5F6FA] rounded-lg p-4">
+                  <p className="text-xs text-[#7E84A3] uppercase">Komentar</p>
+                  <p className="text-[#131523] mt-1">{selectedFeedback.comment}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-[#F5F6FA] rounded-lg p-3">
+                    <p className="text-xs text-[#7E84A3] uppercase">Tanggal</p>
+                    <p className="font-semibold text-[#131523] mt-1">{formatDate(selectedFeedback.createdAt)}</p>
+                  </div>
+                  <div className="bg-[#F5F6FA] rounded-lg p-3">
+                    <p className="text-xs text-[#7E84A3] uppercase">Rating</p>
+                    <p className="font-semibold text-[#131523] mt-1 flex items-center gap-1">
+                      {selectedFeedback.rating} ⭐
+                    </p>
+                  </div>
+                </div>
+
+                {selectedFeedback.status === 'resolved' && selectedFeedback.reply && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p className="text-xs text-green-700 uppercase flex items-center gap-1.5">
+                      <FaReply size={10} />
+                      Balasan Admin
+                    </p>
+                    <p className="text-[#131523] mt-1">{selectedFeedback.reply}</p>
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-3 pt-4 border-t border-[#E1E5F0]">
+                  <button
+                    onClick={() => {
+                      setIsDetailModalOpen(false);
+                      setSelectedFeedback(null);
+                    }}
+                    className="px-4 py-2 border border-[#E1E5F0] rounded-lg hover:bg-[#F5F6FA]"
+                  >
+                    Tutup
+                  </button>
+                  {selectedFeedback.status !== 'resolved' && (
+                    <button
+                      onClick={() => {
+                        setIsDetailModalOpen(false);
+                        handleResolve(selectedFeedback.id);
+                      }}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2"
+                    >
+                      <FaReply />
+                      Balas
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      setIsDetailModalOpen(false);
+                      handleEditClick(selectedFeedback);
+                    }}
+                    className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg flex items-center gap-2"
+                  >
+                    <FaEdit />
+                    Edit
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* DELETE MODAL */}
+        {isDeleteModalOpen && selectedFeedback && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-md w-full">
+              <div className="p-6">
+                <div className="flex items-center gap-2 text-red-600 mb-4">
+                  <FaTrash className="w-5 h-5" />
+                  <h3 className="text-lg font-bold">Yakin ingin menghapus?</h3>
+                </div>
+                <p className="text-[#7E84A3]">
+                  Feedback dari <span className="font-semibold text-[#131523]">"{selectedFeedback.customerName}"</span> akan dihapus secara permanen.
+                </p>
+                <p className="text-[#7E84A3] mt-2">
+                  Komentar: "{selectedFeedback.comment.substring(0, 50)}..."
+                </p>
+                <div className="flex justify-end gap-3 mt-6">
+                  <button
+                    onClick={() => {
+                      setIsDeleteModalOpen(false);
+                      setSelectedFeedback(null);
+                    }}
+                    className="px-4 py-2 border border-[#E1E5F0] rounded-lg hover:bg-[#F5F6FA]"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={handleDeleteConfirm}
+                    disabled={saving}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {saving ? <FaSpinner className="animate-spin" /> : <FaTrash />}
+                    {saving ? 'Menghapus...' : 'Hapus'}
                   </button>
                 </div>
               </div>

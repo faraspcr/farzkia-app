@@ -1,88 +1,48 @@
-import { useState } from 'react';
-import { 
-  Search, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  ChevronLeft, 
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import {
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  ChevronLeft,
   ChevronRight,
   Users,
   RefreshCw,
   Calendar,
   Phone,
   MapPin,
-  Gift,
   ShoppingBag,
   Star,
   User,
   X,
-  Save
+  Save,
+  Loader2
 } from 'lucide-react';
 
-// Helper untuk generate data dummy
-const generateCustomers = (count = 50) => {
-  const firstNames = ['Budi', 'Aisyah', 'Rama', 'Siti', 'Ahmad', 'Maya', 'Hasan', 'Linda', 'Dewi', 'Rina', 'Andi', 'Rudi', 'Sari', 'Tono', 'Wati', 'Joko', 'Susi', 'Agus', 'Dian', 'Eko'];
-  const lastNames = ['Santoso', 'Putri', 'Wijaya', 'Aminah', 'Fauzan', 'Sari', 'Hasan', 'Wati', 'Lestari', 'Surya', 'Pratama', 'Gunawan', 'Setiawan', 'Nugroho', 'Kusuma', 'Rahayu', 'Utami', 'Saputra', 'Hidayat', 'Permadi'];
-  const categories = ['orang_tua_murid', 'santri', 'mahasiswa_umum'];
-  const levels = ['pembaca_baru', 'pembaca_setia', 'mitra_cendekia', 'loyal'];
-  const statuses = ['aktif', 'tidak_aktif', 'loyal'];
-  const products = [
-    'Buku Pendidikan, Novel',
-    'Buku Agama, Motivasi',
-    'Buku Teknologi, Fiksi',
-    'Buku Anak, Pendidikan',
-    'Buku Hadits, Fiqih',
-    'Buku Psikologi, Novel',
-    'Buku Tafsir, Doa',
-    'Buku Cerita, Aktivitas',
-    'Buku Sejarah, Biografi',
-    'Buku Sains, Matematika'
-  ];
-  const preorders = ['Tidak ada pre-order', 'Menunggu konfirmasi', 'Sedang diproses', 'Selesai', 'Menunggu pembayaran'];
-  const actions = ['Membeli 3 buku', 'Pre-order buku tafsir', 'Membeli novel terbaru', 'Membeli paket buku anak', 'Memesan kitab kuning', 'Pre-order mushaf', 'Membeli buku pelajaran', 'Membeli komik', 'Membeli majalah', 'Membeli buku resep'];
+// ============================================
+// KONFIGURASI SUPABASE
+// ============================================
+const API_URL = "https://ajzhvqiottyeodhhtyqb.supabase.co/rest/v1/pelanggan";
+const API_KEY = "sb_publishable_g_qv9oZdohhB98Z33_AWuw_9cT4MS-E";
 
-  const customers = [];
-  
-  for (let i = 1; i <= count; i++) {
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-    const category = categories[Math.floor(Math.random() * categories.length)];
-    const level = levels[Math.floor(Math.random() * levels.length)];
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-    
-    const year = Math.floor(Math.random() * 20) + 1970; // 1970-1990
-    const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-    const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
-    
-    const transYear = 2026;
-    const transMonth = String(Math.floor(Math.random() * 6) + 1).padStart(2, '0');
-    const transDay = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
-    
-    customers.push({
-      id_pelanggan: `CEND-${String(i).padStart(3, '0')}`,
-      nama_pelanggan: `${firstName} ${lastName}`,
-      no_handphone: `6281${String(Math.floor(Math.random() * 900000000) + 100000000)}`,
-      alamat: `Jl. ${['Merdeka', 'Sudirman', 'Thamrin', 'Gajah Mada', 'Hayam Wuruk', 'Diponegoro', 'Ahmad Yani', 'Pahlawan', 'Kartini', 'Imam Bonjol'][Math.floor(Math.random() * 10)]} No. ${Math.floor(Math.random() * 200) + 1}, ${['Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Semarang', 'Malang', 'Bekasi', 'Tangerang', 'Depok', 'Bogor'][Math.floor(Math.random() * 10)]}`,
-      tgl_lahir: `${year}-${month}-${day}`,
-      kategori_pelanggan: category,
-      preferensi_produk: products[Math.floor(Math.random() * products.length)],
-      level_member: level,
-      tgl_transaksi_terakhir: `${transYear}-${transMonth}-${transDay}`,
-      total_transaksi: Math.floor(Math.random() * 50) + 1,
-      status_pelanggan: status,
-      poin_loyalitas: Math.floor(Math.random() * 1500) + 10,
-      status_preorder: preorders[Math.floor(Math.random() * preorders.length)],
-      aksi: actions[Math.floor(Math.random() * actions.length)]
-    });
-  }
-  
-  return customers;
+const headers = {
+  apikey: API_KEY,
+  Authorization: `Bearer ${API_KEY}`,
+  "Content-Type": "application/json",
+};
+
+// headers khusus buat POST/PATCH biar Supabase balikin data barunya
+const headersReturn = {
+  ...headers,
+  Prefer: "return=representation",
 };
 
 const CustomersPage = () => {
-  // Generate 50 data dummy
-  const [customers, setCustomers] = useState(generateCustomers(50));
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('semua');
   const [categoryFilter, setCategoryFilter] = useState('semua');
@@ -93,8 +53,49 @@ const CustomersPage = () => {
   const [editData, setEditData] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [addData, setAddData] = useState(null);
+  const [addFormError, setAddFormError] = useState('');
 
   const itemsPerPage = 10;
+
+  const emptyCustomerForm = () => ({
+    nama_pelanggan: '',
+    no_handphone: '',
+    alamat: '',
+    tgl_lahir: '',
+    kategori_pelanggan: 'mahasiswa_umum',
+    preferensi_produk: '',
+    level_member: 'pembaca_baru',
+    tgl_transaksi_terakhir: '',
+    total_transaksi: 0,
+    status_pelanggan: 'aktif',
+    poin_loyalitas: 0,
+    status_preorder: 'Tidak ada pre-order',
+    aksi: ''
+  });
+
+  // ============================================
+  // FETCH DATA DARI SUPABASE
+  // ============================================
+  const fetchCustomers = async () => {
+    setLoading(true);
+    setErrorMsg('');
+    try {
+      const response = await axios.get(`${API_URL}?order=id_pelanggan.asc`, { headers });
+      setCustomers(response.data);
+    } catch (err) {
+      console.error("Gagal fetch pelanggan:", err);
+      setErrorMsg("Gagal memuat data pelanggan dari server. Cek koneksi atau konfigurasi Supabase.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
 
   // Helper functions
   const getCategoryLabel = (category) => {
@@ -137,10 +138,10 @@ const CustomersPage = () => {
   const formatDate = (date) => {
     if (!date) return '-';
     const d = new Date(date);
-    return d.toLocaleDateString('id-ID', { 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric' 
+    return d.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
     });
   };
 
@@ -160,30 +161,95 @@ const CustomersPage = () => {
 
   // Filtering data
   const filteredCustomers = customers.filter(customer => {
-    const matchesSearch = customer.nama_pelanggan.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         customer.id_pelanggan.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         customer.no_handphone.includes(searchTerm);
+    const matchesSearch = customer.nama_pelanggan?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         customer.id_pelanggan?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         customer.no_handphone?.includes(searchTerm);
     const matchesStatus = statusFilter === 'semua' || customer.status_pelanggan === statusFilter;
     const matchesCategory = categoryFilter === 'semua' || customer.kategori_pelanggan === categoryFilter;
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
   // Pagination
-  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCustomers = filteredCustomers.slice(startIndex, startIndex + itemsPerPage);
 
-  // Statistics
-  const stats = {
-    total: customers.length,
-    aktif: customers.filter(c => c.status_pelanggan === 'aktif').length,
-    loyal: customers.filter(c => c.status_pelanggan === 'loyal').length,
-    tidakAktif: customers.filter(c => c.status_pelanggan === 'tidak_aktif').length,
-    mitraCendekia: customers.filter(c => c.level_member === 'mitra_cendekia').length,
-    totalPoin: customers.reduce((sum, c) => sum + (c.poin_loyalitas || 0), 0)
+  // Hitung ID berikutnya secara berurutan, misal data terakhir CEND-010 -> CEND-011
+  const getNextCustomerId = () => {
+    const numbers = customers
+      .map(c => {
+        const match = c.id_pelanggan?.match(/CEND-(\d+)/);
+        return match ? parseInt(match[1], 10) : 0;
+      })
+      .filter(n => !isNaN(n));
+    const maxNumber = numbers.length > 0 ? Math.max(...numbers) : 0;
+    const nextNumber = maxNumber + 1;
+    return `CEND-${String(nextNumber).padStart(3, '0')}`;
   };
 
-  // Handle Edit
+  // ============================================
+  // TAMBAH PELANGGAN -> buka form dulu, baru POST ke Supabase
+  // ============================================
+  const handleOpenAddModal = () => {
+    setAddData(emptyCustomerForm());
+    setAddFormError('');
+    setIsAddOpen(true);
+  };
+
+  const handleAddChange = (e) => {
+    const { name, value } = e.target;
+    setAddData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleAddSubmit = async () => {
+    if (!addData.nama_pelanggan.trim() || !addData.no_handphone.trim()) {
+      setAddFormError('Nama pelanggan dan No Handphone wajib diisi.');
+      return;
+    }
+
+    setSaving(true);
+    setAddFormError('');
+    setErrorMsg('');
+
+    const newCustomer = {
+      id_pelanggan: getNextCustomerId(),
+      nama_pelanggan: addData.nama_pelanggan.trim(),
+      no_handphone: addData.no_handphone.trim(),
+      alamat: addData.alamat || null,
+      tgl_lahir: addData.tgl_lahir || null,
+      kategori_pelanggan: addData.kategori_pelanggan,
+      preferensi_produk: addData.preferensi_produk || null,
+      level_member: addData.level_member,
+      tgl_transaksi_terakhir: addData.tgl_transaksi_terakhir || null,
+      total_transaksi: Number(addData.total_transaksi) || 0,
+      status_pelanggan: addData.status_pelanggan,
+      poin_loyalitas: Number(addData.poin_loyalitas) || 0,
+      status_preorder: addData.status_preorder || 'Tidak ada pre-order',
+      aksi: addData.aksi || null
+    };
+
+    try {
+      const response = await axios.post(API_URL, newCustomer, { headers: headersReturn });
+      const inserted = response.data[0];
+      setCustomers(prev =>
+        [...prev, inserted].sort((a, b) => a.id_pelanggan.localeCompare(b.id_pelanggan, undefined, { numeric: true }))
+      );
+      setIsAddOpen(false);
+      setAddData(null);
+    } catch (err) {
+      console.error("Gagal menambah pelanggan:", err);
+      setAddFormError("Gagal menambah pelanggan baru. Coba lagi.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ============================================
+  // EDIT PELANGGAN -> PATCH ke Supabase
+  // ============================================
   const handleEditClick = (customer) => {
     setEditData({ ...customer });
     setIsEditOpen(true);
@@ -197,44 +263,53 @@ const CustomersPage = () => {
     }));
   };
 
-  const handleEditSubmit = () => {
-    setCustomers(prev =>
-      prev.map(customer =>
-        customer.id_pelanggan === editData.id_pelanggan ? editData : customer
-      )
-    );
-    setIsEditOpen(false);
-    setEditData(null);
+  const handleEditSubmit = async () => {
+    setSaving(true);
+    setErrorMsg('');
+    try {
+      const response = await axios.patch(
+        `${API_URL}?id_pelanggan=eq.${editData.id_pelanggan}`,
+        editData,
+        { headers: headersReturn }
+      );
+      const updated = response.data[0];
+      setCustomers(prev =>
+        prev.map(customer =>
+          customer.id_pelanggan === updated.id_pelanggan ? updated : customer
+        )
+      );
+      setIsEditOpen(false);
+      setEditData(null);
+    } catch (err) {
+      console.error("Gagal update pelanggan:", err);
+      setErrorMsg("Gagal menyimpan perubahan. Coba lagi.");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  // Handle Delete
-  const handleDelete = () => {
-    setCustomers(prev =>
-      prev.filter(customer => customer.id_pelanggan !== customerToDelete.id_pelanggan)
-    );
-    setDeleteDialogOpen(false);
-    setCustomerToDelete(null);
-  };
-
-  // Handle Tambah Data
-  const handleAddCustomer = () => {
-    const newCustomer = {
-      id_pelanggan: `CEND-${String(customers.length + 1).padStart(3, '0')}`,
-      nama_pelanggan: 'Pelanggan Baru',
-      no_handphone: '6281000000000',
-      alamat: 'Jl. Baru No. 1, Jakarta',
-      tgl_lahir: '2000-01-01',
-      kategori_pelanggan: 'mahasiswa_umum',
-      preferensi_produk: 'Buku Umum',
-      level_member: 'pembaca_baru',
-      tgl_transaksi_terakhir: new Date().toISOString().split('T')[0],
-      total_transaksi: 0,
-      status_pelanggan: 'aktif',
-      poin_loyalitas: 0,
-      status_preorder: 'Tidak ada pre-order',
-      aksi: '-'
-    };
-    setCustomers(prev => [...prev, newCustomer]);
+  // ============================================
+  // HAPUS PELANGGAN -> DELETE ke Supabase
+  // ============================================
+  const handleDelete = async () => {
+    setSaving(true);
+    setErrorMsg('');
+    try {
+      await axios.delete(
+        `${API_URL}?id_pelanggan=eq.${customerToDelete.id_pelanggan}`,
+        { headers }
+      );
+      setCustomers(prev =>
+        prev.filter(customer => customer.id_pelanggan !== customerToDelete.id_pelanggan)
+      );
+      setDeleteDialogOpen(false);
+      setCustomerToDelete(null);
+    } catch (err) {
+      console.error("Gagal menghapus pelanggan:", err);
+      setErrorMsg("Gagal menghapus pelanggan. Coba lagi.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -250,33 +325,22 @@ const CustomersPage = () => {
           <p className="text-sm text-[#7E84A3] mt-1">Total data: {customers.length} pelanggan</p>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
-          <div className="bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-[#7E84A3]">Total Pelanggan</p>
-            <p className="text-2xl font-bold text-[#131523]">{stats.total}</p>
+        {/* Error banner */}
+        {errorMsg && (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
+            {errorMsg}
           </div>
-          <div className="bg-gradient-to-br from-green-50 to-white border border-green-200 rounded-lg p-4">
-            <p className="text-sm text-[#7E84A3]">Aktif</p>
-            <p className="text-2xl font-bold text-green-600">{stats.aktif}</p>
+        )}
+
+        {/* Loading state */}
+        {loading ? (
+          <div className="flex items-center justify-center gap-2 text-[#7E84A3] py-20">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            Memuat data pelanggan dari server...
           </div>
-          <div className="bg-gradient-to-br from-yellow-50 to-white border border-yellow-200 rounded-lg p-4">
-            <p className="text-sm text-[#7E84A3]">Loyal</p>
-            <p className="text-2xl font-bold text-yellow-600">{stats.loyal}</p>
-          </div>
-          <div className="bg-gradient-to-br from-red-50 to-white border border-red-200 rounded-lg p-4">
-            <p className="text-sm text-[#7E84A3]">Tidak Aktif</p>
-            <p className="text-2xl font-bold text-red-600">{stats.tidakAktif}</p>
-          </div>
-          <div className="bg-gradient-to-br from-purple-50 to-white border border-purple-200 rounded-lg p-4">
-            <p className="text-sm text-[#7E84A3]">Mitra Cendekia</p>
-            <p className="text-2xl font-bold text-purple-600">{stats.mitraCendekia}</p>
-          </div>
-          <div className="bg-gradient-to-br from-orange-50 to-white border border-orange-200 rounded-lg p-4">
-            <p className="text-sm text-[#7E84A3]">Total Poin</p>
-            <p className="text-2xl font-bold text-orange-600">{stats.totalPoin}</p>
-          </div>
-        </div>
+        ) : (
+        <>
+        {/* Statistics Cards - DIHAPUS */}
 
         {/* Filters */}
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
@@ -324,8 +388,16 @@ const CustomersPage = () => {
               <RefreshCw className="w-4 h-4" />
               Reset
             </button>
-            <button 
-              onClick={handleAddCustomer}
+            <button
+              onClick={fetchCustomers}
+              title="Muat ulang data dari Supabase"
+              className="px-4 py-2 border border-[#E1E5F0] rounded-lg hover:bg-[#F5F6FA] flex items-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Refresh
+            </button>
+            <button
+              onClick={handleOpenAddModal}
               className="px-4 py-2 bg-[#1A5CFF] hover:bg-[#1A5CFF]/90 text-white rounded-lg flex items-center gap-2 ml-auto"
             >
               <Plus className="w-4 h-4" />
@@ -403,8 +475,15 @@ const CustomersPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {paginatedCustomers.map((customer, index) => (
-                  <tr key={index} className="hover:bg-[#F8F9FC] transition-colors border-t border-[#E1E5F0]">
+                {paginatedCustomers.length === 0 ? (
+                  <tr>
+                    <td colSpan={12} className="px-4 py-10 text-center text-[#7E84A3]">
+                      Belum ada data pelanggan yang cocok.
+                    </td>
+                  </tr>
+                ) : (
+                paginatedCustomers.map((customer) => (
+                  <tr key={customer.id_pelanggan} className="hover:bg-[#F8F9FC] transition-colors border-t border-[#E1E5F0]">
                     <td className="px-4 py-3 font-medium text-[#1A5CFF] text-sm whitespace-nowrap">
                       {customer.id_pelanggan}
                     </td>
@@ -458,7 +537,7 @@ const CustomersPage = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button 
+                        <button
                           className="p-1.5 hover:bg-yellow-50 hover:text-yellow-600 rounded-lg transition-colors"
                           onClick={() => handleEditClick(customer)}
                           title="Edit"
@@ -478,7 +557,8 @@ const CustomersPage = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                ))
+                )}
               </tbody>
             </table>
           </div>
@@ -486,7 +566,7 @@ const CustomersPage = () => {
           {/* Pagination */}
           <div className="flex items-center justify-between px-6 py-4 border-t border-[#E1E5F0]">
             <p className="text-sm text-[#7E84A3]">
-              Menampilkan {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredCustomers.length)} dari {filteredCustomers.length} pelanggan
+              Menampilkan {filteredCustomers.length === 0 ? 0 : startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredCustomers.length)} dari {filteredCustomers.length} pelanggan
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -512,8 +592,8 @@ const CustomersPage = () => {
                     key={i}
                     onClick={() => setCurrentPage(pageNum)}
                     className={`px-3 py-1 rounded-lg ${
-                      currentPage === pageNum 
-                        ? 'bg-[#1A5CFF] text-white' 
+                      currentPage === pageNum
+                        ? 'bg-[#1A5CFF] text-white'
                         : 'border border-[#E1E5F0] hover:bg-[#F5F6FA]'
                     }`}
                   >
@@ -531,6 +611,8 @@ const CustomersPage = () => {
             </div>
           </div>
         </div>
+        </>
+        )}
       </div>
 
       {/* Detail Modal */}
@@ -547,7 +629,6 @@ const CustomersPage = () => {
               </button>
             </div>
             <div className="p-6 space-y-6">
-              {/* Profile Header */}
               <div className="bg-gradient-to-r from-[#1A5CFF]/5 to-[#1A5CFF]/10 rounded-xl p-6">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-[#1A5CFF] rounded-full flex items-center justify-center text-white text-2xl font-bold">
@@ -560,7 +641,6 @@ const CustomersPage = () => {
                 </div>
               </div>
 
-              {/* Detail Grid - All Attributes */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 <div className="bg-[#F5F6FA] rounded-lg p-4">
                   <p className="text-xs text-[#7E84A3] uppercase tracking-wider">ID Pelanggan</p>
@@ -622,6 +702,203 @@ const CustomersPage = () => {
                   <p className="text-xs text-[#7E84A3] uppercase tracking-wider">Aksi Terakhir</p>
                   <p className="font-semibold text-[#131523] mt-1">{selectedCustomer.aksi || '-'}</p>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Modal */}
+      {isAddOpen && addData && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-[#E1E5F0] px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-[#131523] flex items-center gap-2">
+                <Plus className="w-6 h-6 text-[#1A5CFF]" />
+                Tambah Pelanggan Baru
+              </h2>
+              <button
+                onClick={() => {
+                  setIsAddOpen(false);
+                  setAddData(null);
+                }}
+                className="p-2 hover:bg-[#F5F6FA] rounded-lg text-2xl"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              {addFormError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+                  {addFormError}
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#131523] mb-1">Nama Pelanggan *</label>
+                  <input
+                    type="text"
+                    name="nama_pelanggan"
+                    value={addData.nama_pelanggan}
+                    onChange={handleAddChange}
+                    placeholder="Contoh: Budi Santoso"
+                    className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#131523] mb-1">No Handphone *</label>
+                  <input
+                    type="text"
+                    name="no_handphone"
+                    value={addData.no_handphone}
+                    onChange={handleAddChange}
+                    placeholder="6281234567890"
+                    className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#131523] mb-1">Tanggal Lahir</label>
+                  <input
+                    type="date"
+                    name="tgl_lahir"
+                    value={addData.tgl_lahir}
+                    onChange={handleAddChange}
+                    className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-[#131523] mb-1">Alamat</label>
+                  <input
+                    type="text"
+                    name="alamat"
+                    value={addData.alamat}
+                    onChange={handleAddChange}
+                    placeholder="Jl. Contoh No. 1, Kota"
+                    className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#131523] mb-1">Kategori Pelanggan *</label>
+                  <select
+                    name="kategori_pelanggan"
+                    value={addData.kategori_pelanggan}
+                    onChange={handleAddChange}
+                    className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                  >
+                    <option value="orang_tua_murid">Orang Tua Murid</option>
+                    <option value="santri">Santri</option>
+                    <option value="mahasiswa_umum">Mahasiswa/Umum</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#131523] mb-1">Preferensi Produk</label>
+                  <input
+                    type="text"
+                    name="preferensi_produk"
+                    value={addData.preferensi_produk}
+                    onChange={handleAddChange}
+                    placeholder="Buku Pendidikan, Novel"
+                    className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#131523] mb-1">Level Member *</label>
+                  <select
+                    name="level_member"
+                    value={addData.level_member}
+                    onChange={handleAddChange}
+                    className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                  >
+                    <option value="pembaca_baru">Pembaca Baru</option>
+                    <option value="pembaca_setia">Pembaca Setia</option>
+                    <option value="mitra_cendekia">Mitra Cendekia</option>
+                    <option value="loyal">Loyal</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#131523] mb-1">Status Pelanggan *</label>
+                  <select
+                    name="status_pelanggan"
+                    value={addData.status_pelanggan}
+                    onChange={handleAddChange}
+                    className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                  >
+                    <option value="aktif">Aktif</option>
+                    <option value="tidak_aktif">Tidak Aktif</option>
+                    <option value="loyal">Loyal</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#131523] mb-1">Tanggal Transaksi Terakhir</label>
+                  <input
+                    type="date"
+                    name="tgl_transaksi_terakhir"
+                    value={addData.tgl_transaksi_terakhir}
+                    onChange={handleAddChange}
+                    className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#131523] mb-1">Total Transaksi</label>
+                  <input
+                    type="number"
+                    name="total_transaksi"
+                    value={addData.total_transaksi}
+                    onChange={handleAddChange}
+                    className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#131523] mb-1">Poin Loyalitas</label>
+                  <input
+                    type="number"
+                    name="poin_loyalitas"
+                    value={addData.poin_loyalitas}
+                    onChange={handleAddChange}
+                    className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-[#131523] mb-1">Status Pre-Order</label>
+                  <input
+                    type="text"
+                    name="status_preorder"
+                    value={addData.status_preorder}
+                    onChange={handleAddChange}
+                    className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-[#131523] mb-1">Aksi Terakhir</label>
+                  <input
+                    type="text"
+                    name="aksi"
+                    value={addData.aksi}
+                    onChange={handleAddChange}
+                    placeholder="Membeli 3 buku"
+                    className="w-full px-4 py-2 border border-[#E1E5F0] rounded-lg focus:border-[#1A5CFF] focus:outline-none"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t border-[#E1E5F0]">
+                <button
+                  onClick={() => {
+                    setIsAddOpen(false);
+                    setAddData(null);
+                  }}
+                  className="px-4 py-2 border border-[#E1E5F0] rounded-lg hover:bg-[#F5F6FA] flex items-center gap-2"
+                >
+                  <X className="w-4 h-4" />
+                  Batal
+                </button>
+                <button
+                  onClick={handleAddSubmit}
+                  disabled={saving}
+                  className="px-4 py-2 bg-[#1A5CFF] hover:bg-[#1A5CFF]/90 text-white rounded-lg flex items-center gap-2 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  {saving ? 'Menyimpan...' : 'Simpan Pelanggan'}
+                </button>
               </div>
             </div>
           </div>
@@ -803,10 +1080,11 @@ const CustomersPage = () => {
                 </button>
                 <button
                   onClick={handleEditSubmit}
-                  className="px-4 py-2 bg-[#1A5CFF] hover:bg-[#1A5CFF]/90 text-white rounded-lg flex items-center gap-2"
+                  disabled={saving}
+                  className="px-4 py-2 bg-[#1A5CFF] hover:bg-[#1A5CFF]/90 text-white rounded-lg flex items-center gap-2 disabled:opacity-50"
                 >
                   <Save className="w-4 h-4" />
-                  Simpan Perubahan
+                  {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
                 </button>
               </div>
             </div>
@@ -838,9 +1116,10 @@ const CustomersPage = () => {
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                  disabled={saving}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
                 >
-                  Hapus
+                  {saving ? 'Menghapus...' : 'Hapus'}
                 </button>
               </div>
             </div>

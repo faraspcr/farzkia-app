@@ -1,64 +1,191 @@
-// Data Pre-Order Toko Buku Cendekia - IDIC Model
-const preordersData = [
-  { id: 1, customerId: 3, customerName: "Rama Wijaya", customerPhone: "6281377889900", productId: 11, productName: "Mukjizat Al-Qur'an", quantity: 1, status: "waiting_stock", requestDate: "2025-03-15", notified: false, estimatedArrival: "2025-04-20" },
-  { id: 2, customerId: 4, customerName: "Siti Aminah", customerPhone: "6281345678901", productId: 2, productName: "Buku Paket Matematika Kelas 6 SD", quantity: 1, status: "waiting_stock", requestDate: "2025-03-28", notified: false, estimatedArrival: "2025-04-15" },
-  { id: 3, customerId: 1, customerName: "Budi Santoso", customerPhone: "6281234567890", productId: 10, productName: "Buku Paket IPA Kelas 9 SMP", quantity: 2, status: "notified", requestDate: "2025-03-10", notified: true, estimatedArrival: "2025-04-01", notificationDate: "2025-04-01" },
-  { id: 4, customerId: 6, customerName: "Maya Sari", customerPhone: "6281467890123", productId: 5, productName: "Kamus Arab-Indonesia", quantity: 1, status: "fulfilled", requestDate: "2025-02-20", notified: true, estimatedArrival: "2025-03-10", fulfilledDate: "2025-03-12" },
-  { id: 5, customerId: 8, customerName: "Linda Wati", customerPhone: "6281689012345", productId: 13, productName: "Buku Paket IPS Kelas 7 SMP", quantity: 1, status: "waiting_stock", requestDate: "2025-04-01", notified: false, estimatedArrival: "2025-04-25" },
-  { id: 6, customerId: 10, customerName: "Dewi Lestari", customerPhone: "6281823456789", productId: 14, productName: "Al-Qur'an Hafalan", quantity: 2, status: "waiting_stock", requestDate: "2025-04-02", notified: false, estimatedArrival: "2025-04-30" },
-  { id: 7, customerId: 12, customerName: "Fitri Handayani", customerPhone: "6281545678901", productId: 4, productName: "Kamus Inggris-Indonesia", quantity: 1, status: "notified", requestDate: "2025-03-20", notified: true, estimatedArrival: "2025-04-10", notificationDate: "2025-04-10" },
-  { id: 8, customerId: 14, customerName: "Hani Pratiwi", customerPhone: "6281767890123", productId: 8, productName: "Buku Paket Bahasa Inggris Kelas 3 SD", quantity: 1, status: "waiting_stock", requestDate: "2025-04-03", notified: false, estimatedArrival: "2025-04-18" },
-  { id: 9, customerId: 16, customerName: "Julia Rahmawati", customerPhone: "6281989012345", productId: 7, productName: "Riyadhus Shalihin", quantity: 2, status: "fulfilled", requestDate: "2025-03-05", notified: true, estimatedArrival: "2025-03-25", fulfilledDate: "2025-03-26" },
-  { id: 10, customerId: 25, customerName: "Siska Dewi", customerPhone: "6281889012345", productId: 11, productName: "Mukjizat Al-Qur'an", quantity: 1, status: "waiting_stock", requestDate: "2025-04-04", notified: false, estimatedArrival: "2025-04-22" }
+// src/data/preorders.js
+
+// Data awal
+let preordersData = [
+  {
+    id: 'PO-001',
+    productName: 'Mukjizat Al-Qur\'an',
+    customerName: 'Rama Wijaya',
+    customerPhone: '6281234567890',
+    requestDate: '2025-03-15',
+    estimatedArrival: '2025-03-30',
+    status: 'notified'
+  },
+  {
+    id: 'PO-002',
+    productName: 'Buku Paket Matematika Kelas 6 SD',
+    customerName: 'Siti Aminah',
+    customerPhone: '6289876543210',
+    requestDate: '2025-03-28',
+    estimatedArrival: '2025-04-15',
+    status: 'waiting_stock'
+  },
+  {
+    id: 'PO-003',
+    productName: 'Buku Paket IPA Kelas 9 SMP',
+    customerName: 'Budi Santoso',
+    customerPhone: '6285555555555',
+    requestDate: '2025-03-10',
+    estimatedArrival: '2025-03-25',
+    status: 'notified'
+  },
+  {
+    id: 'PO-004',
+    productName: 'Kamus Arab-Indonesia',
+    customerName: 'Maya Sari',
+    customerPhone: '6287777777777',
+    requestDate: '2025-02-20',
+    estimatedArrival: '2025-03-10',
+    status: 'waiting_stock'
+  },
+  {
+    id: 'PO-005',
+    productName: 'Buku Paket IPS Kelas 7 SMP',
+    customerName: 'Linda Wati',
+    customerPhone: '6289999999999',
+    requestDate: '2025-04-01',
+    estimatedArrival: '2025-04-20',
+    status: 'notified'
+  },
+  {
+    id: 'PO-006',
+    productName: 'Al-Qur\'an Hafalan',
+    customerName: 'Dewi Lestari',
+    customerPhone: '6281111111111',
+    requestDate: '2025-04-02',
+    estimatedArrival: '2025-04-25',
+    status: 'waiting_stock'
+  },
+  {
+    id: 'PO-007',
+    productName: 'Al-Qur\'an Hafalan',
+    customerName: 'Dewi Lestari',
+    customerPhone: '6281111111111',
+    requestDate: '2025-04-02',
+    estimatedArrival: '2025-04-25',
+    status: 'waiting_stock'
+  }
 ];
 
-// ========== SERVICE (CRUD) ==========
-let preorders = [...preordersData];
+// ============================================
+// CRUD FUNCTIONS
+// ============================================
 
+// GET - Ambil semua pre-order
 export const getPreorders = () => {
-  const stored = localStorage.getItem('cendekia_preorders');
-  if (stored) return JSON.parse(stored);
-  return preorders;
+  return [...preordersData];
 };
 
-export const savePreorders = (data) => {
-  localStorage.setItem('cendekia_preorders', JSON.stringify(data));
+// GET by ID - Ambil satu pre-order
+export const getPreorderById = (id) => {
+  return preordersData.find(p => p.id === id);
 };
 
-export const addPreorder = (preorder) => {
-  const all = getPreorders();
-  const newPreorder = {
-    ...preorder,
-    id: Date.now(),
-    status: 'waiting_stock',
-    requestDate: new Date().toISOString().split('T')[0],
-    notified: false
-  };
-  all.push(newPreorder);
-  savePreorders(all);
+// POST - Tambah pre-order baru
+export const addPreorder = (newPreorder) => {
+  preordersData.push(newPreorder);
   return newPreorder;
 };
 
-export const updatePreorderStatus = (id, status) => {
-  const all = getPreorders();
-  const index = all.findIndex(p => p.id === id);
+// PUT - Update pre-order
+export const updatePreorder = (id, updatedData) => {
+  const index = preordersData.findIndex(p => p.id === id);
   if (index !== -1) {
-    all[index].status = status;
-    if (status === 'notified') {
-      all[index].notified = true;
-      all[index].notificationDate = new Date().toISOString().split('T')[0];
-    }
-    if (status === 'fulfilled') {
-      all[index].fulfilledDate = new Date().toISOString().split('T')[0];
-    }
-    savePreorders(all);
-    return all[index];
+    preordersData[index] = { ...updatedData };
+    return preordersData[index];
   }
-  return null;
+  throw new Error('Pre-order tidak ditemukan');
 };
 
-export const getWaitingPreorders = () => {
-  return getPreorders().filter(p => p.status === 'waiting_stock');
+// PATCH - Update status pre-order
+export const updatePreorderStatus = (id, newStatus) => {
+  const preorder = preordersData.find(p => p.id === id);
+  if (preorder) {
+    preorder.status = newStatus;
+    if (newStatus === 'notified') {
+      // Simulasi kirim notifikasi
+      console.log(`Notifikasi dikirim ke ${preorder.customerName} untuk produk ${preorder.productName}`);
+    }
+    return preorder;
+  }
+  throw new Error('Pre-order tidak ditemukan');
 };
 
-export default preorders;
+// DELETE - Hapus pre-order
+export const deletePreorder = (id) => {
+  const index = preordersData.findIndex(p => p.id === id);
+  if (index !== -1) {
+    preordersData.splice(index, 1);
+    return true;
+  }
+  throw new Error('Pre-order tidak ditemukan');
+};
+
+// Reset data (untuk testing)
+export const resetPreorders = () => {
+  preordersData = [
+    {
+      id: 'PO-001',
+      productName: 'Mukjizat Al-Qur\'an',
+      customerName: 'Rama Wijaya',
+      customerPhone: '6281234567890',
+      requestDate: '2025-03-15',
+      estimatedArrival: '2025-03-30',
+      status: 'notified'
+    },
+    {
+      id: 'PO-002',
+      productName: 'Buku Paket Matematika Kelas 6 SD',
+      customerName: 'Siti Aminah',
+      customerPhone: '6289876543210',
+      requestDate: '2025-03-28',
+      estimatedArrival: '2025-04-15',
+      status: 'waiting_stock'
+    },
+    {
+      id: 'PO-003',
+      productName: 'Buku Paket IPA Kelas 9 SMP',
+      customerName: 'Budi Santoso',
+      customerPhone: '6285555555555',
+      requestDate: '2025-03-10',
+      estimatedArrival: '2025-03-25',
+      status: 'notified'
+    },
+    {
+      id: 'PO-004',
+      productName: 'Kamus Arab-Indonesia',
+      customerName: 'Maya Sari',
+      customerPhone: '6287777777777',
+      requestDate: '2025-02-20',
+      estimatedArrival: '2025-03-10',
+      status: 'waiting_stock'
+    },
+    {
+      id: 'PO-005',
+      productName: 'Buku Paket IPS Kelas 7 SMP',
+      customerName: 'Linda Wati',
+      customerPhone: '6289999999999',
+      requestDate: '2025-04-01',
+      estimatedArrival: '2025-04-20',
+      status: 'notified'
+    },
+    {
+      id: 'PO-006',
+      productName: 'Al-Qur\'an Hafalan',
+      customerName: 'Dewi Lestari',
+      customerPhone: '6281111111111',
+      requestDate: '2025-04-02',
+      estimatedArrival: '2025-04-25',
+      status: 'waiting_stock'
+    },
+    {
+      id: 'PO-007',
+      productName: 'Al-Qur\'an Hafalan',
+      customerName: 'Dewi Lestari',
+      customerPhone: '6281111111111',
+      requestDate: '2025-04-02',
+      estimatedArrival: '2025-04-25',
+      status: 'waiting_stock'
+    }
+  ];
+};
